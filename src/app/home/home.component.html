@@ -1,0 +1,10 @@
+ 
+<div class="container">
+  <ng-whiteboard 
+    class="whiteboard-box"
+    [enableGrid]="true"
+    [center]="true" 
+    (dataChange)="onDataChange($event)" 
+    [options]="whiteboardOptions">
+  </ng-whiteboard>
+</div>

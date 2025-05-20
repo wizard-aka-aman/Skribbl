@@ -1,0 +1,12 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Make parent container full height */
+}
+
+.whiteboard-box {
+  width: 50% ;
+  height: 50%;
+  border: 1px solid #ccc;
+}
