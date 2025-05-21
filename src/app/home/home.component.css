@@ -1,12 +1,24 @@
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh; /* Make parent container full height */
-}
-
-.whiteboard-box {
-  width: 50% ;
-  height: 50%;
-  border: 1px solid #ccc;
-}
+/* Ensure chat fills viewport height */
+.chat-container {
+    max-width: 700px;
+    margin: 0 auto;
+    height: 100vh;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+  }
+  
+  /* Chat message bubbles */
+  .message-bubble {
+    border-radius: 20px;
+    max-width: 70%;
+    word-break: break-word;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Chat input stays at bottom */
+  .chat-input {
+    border-top: 1px solid #dee2e6;
+    padding-top: 0.75rem;
+  }
+  

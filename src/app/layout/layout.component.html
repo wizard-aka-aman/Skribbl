@@ -1,0 +1,40 @@
+<div class="lobby-container">
+  <div class="lobby-card">
+    <h1>Skribbl Game</h1>
+
+    <div class="button-group">
+      <button class="action-btn" (click)="createRoom()">Create Room</button>
+      <button class="action-btn" data-bs-toggle="modal" data-bs-target="#exampleModal"  >Join Room</button>
+    </div>
+
+    <div
+      *ngIf="groupId"
+      class="alert m-3 alert-success d-flex justify-content-between align-items-center"
+    >
+      <span><strong>Group ID:</strong> <br> {{ groupId }}</span>
+      <button class="btn btn-outline-secondary btn-sm" (click)="copygroupId()">
+        Copy
+      </button>
+    </div>
+  </div>
+</div> 
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Group ID : <input type="text" [(ngModel)]="userinput"> <br>
+        Name : <input type="text" [(ngModel)]="user">  <br> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"  [routerLink]="['/home']"[queryParams]="{groupId : userinput , user : user}"  >Join Room</button>
+      </div>
+    </div>
+  </div>
+</div>
