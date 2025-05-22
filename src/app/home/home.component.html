@@ -2,7 +2,7 @@
   <div class="row  ">
 
     <!-- Left Panel: Active Users -->
-    <div class="col-md-3 col-sm-12 bg-light border-end d-flex flex-column p-3">
+    <div class="col-md-2 col-sm-12 bg-light border-end d-flex flex-column p-3">
       <h5 class="text-center mb-3">Active Users</h5>
       <div class="flex-grow-1 overflow-auto">
         <div *ngFor="let item of activeUsers" class="mb-2">
@@ -13,20 +13,23 @@
     </div>
 
     <!-- Center Panel: Canvas -->
-    <div class="col-md-6 col-sm-12 d-flex flex-column p-3">
-      <div class="flex-grow-1 border rounded shadow-sm mb-3">
+    <div class="col-md-7 col-sm-12 d-flex flex-column p-3">
+      <div  class="flex-grow-1  border rounded shadow-sm mb-3">
+       <div   *ngIf="!isStarted"> Start a game with  {{activeUsers.length}} users : <button class="btn btn-outline-secondary w-10 " (click)="start()">Start</button></div>
         <ng-whiteboard  
+        (mouseup)="send()"
           style="height: 100%; width: 100%;"
           class="whiteboard-box"  
           [center]="true"
           (dataChange)="onDataChange($event)" 
+          [drawingEnabled]="whoDraw == user?true:false"
           [options]="whiteboardOptions"> 
         </ng-whiteboard>
       </div>
 
       <!-- Controls Below Canvas -->
       <div class="d-flex justify-content-between  ">
-        <button class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0" (click)="Undo()">Undo</button>
+        <button class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0" (click)="Undo() ">Undo</button>
         <button class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0" (click)="clearBoard()">Clear</button>
         <button class="btn btn-primary w-100 w-sm-auto" (click)="send()">Send Canvas</button>
       </div>
@@ -68,5 +71,28 @@
 
 
 
+  </div>
+</div>
+
+ <!-- Button trigger modal -->
+<button  #modalbtn  type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+  Launch static backdrop modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> 
+      </div>
+    </div>
   </div>
 </div>

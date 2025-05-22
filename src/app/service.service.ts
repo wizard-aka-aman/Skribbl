@@ -12,6 +12,8 @@ export class ServiceService {
   baseUrl = 'https://localhost:7263'; // local server as needed
   pen: any
   users: any;
+  
+
   constructor(private http: HttpClient) { }
   public async startConnection(groupId: string, user: string,
     onCanvasReceive: (groupId: string, data: any) => void,
@@ -33,12 +35,7 @@ export class ServiceService {
       console.log(`${username} left group ${groupId}`);
       // Optionally remove from UI list of active users
       this.GetUsersInGroup(groupId).then(onUserListUpdate);
-    });
-
-
-
-
-
+    }); 
 
     try {
       await this.hubConnection.start();
@@ -85,4 +82,8 @@ export class ServiceService {
       return [];
     });;
   }
+
+  //api's
+
+
 }
