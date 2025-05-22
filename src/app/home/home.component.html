@@ -1,45 +1,72 @@
-<div class="d-flex" style="height: 88vh; width: 100vw;">
+<div class="container-fluid   overflow-hidden">
+  <div class="row  ">
 
-  <!-- Canvas on the Left -->
-  <div class="d-flex flex-column justify-content-between p-2" style="width: 100%; height: 100%;">
-    <ng-whiteboard  
-      style="border: 2px solid rgb(224, 224, 224); height: 100%;"
-      class="whiteboard-box"  
-      [center]="true"
-      (dataChange)="onDataChange($event)" 
-      [options]="whiteboardOptions"> 
-    </ng-whiteboard>
-
-    <!-- Controls Below Canvas -->
-    <div class="d-flex justify-content-around align-items-center mt-2">
-      <div class="btn btn-secondary" (click)="Undo()">Undo</div>
-      <div class="btn btn-secondary" (click)="clearBoard()">Clear</div> 
-      <div class="btn btn-secondary" (click)="send()">Send Canvas</div> 
-    </div>
-  </div>
-
-  <!-- Chat on the Right -->
-  <div class="chat-container d-flex flex-column p-3" style="width: 50%; height: 100%;">
-    
-    <div class="username-body d-flex justify-content-center align-items-center rounded   mb-3" style="background-color: rgb(161, 159, 255); height: 50px;">
-      {{naam}}
-    </div>
-
-    <div #chatContainer class="chat-messages flex-grow-1 overflow-auto mb-3" style="height: 100%;">
-      <div *ngFor="let msg of chats" class="d-flex mb-2" [ngClass]="msg.sender === user ? 'justify-content-end' : 'justify-content-start'">
-        <div class="message-bubble px-3 py-2" style="position: relative;" [ngClass]="msg.sender === user ? 'bg-primary text-white me-2' : 'bg-secondary text-white ms-2'">
-          <small class="fw-bold d-block" [ngClass]="msg.sender === user ? 'd-flex justify-content-end' : ''">{{ msg.sender }}</small>
-          {{ msg.message }}   
-          <p class="text-muted" [ngClass]="msg.sender === user ? 'd-flex justify-content-end' : ''" style="font-size: 15px; margin: 0; padding: 0;">{{msg.sentAt | date : 'MMM d, y, h:mm a'}}</p>
+    <!-- Left Panel: Active Users -->
+    <div class="col-md-3 col-sm-12 bg-light border-end d-flex flex-column p-3">
+      <h5 class="text-center mb-3">Active Users</h5>
+      <div class="flex-grow-1 overflow-auto">
+        <div *ngFor="let item of activeUsers" class="mb-2">
+          <span class="badge bg-primary" *ngIf="item === user"><b>{{ item }} (You)</b></span>
+          <span class="badge bg-secondary" *ngIf="item !== user">{{ item }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Chat Input -->
-    <div class="chat-input d-flex">
-      <input type="text" class="form-control" placeholder="Type a message..." [(ngModel)]="message" (keydown.enter)="send()" />
-      <button class="btn btn-primary ms-2" (click)="sendchat()">Send</button>
+    <!-- Center Panel: Canvas -->
+    <div class="col-md-6 col-sm-12 d-flex flex-column p-3">
+      <div class="flex-grow-1 border rounded shadow-sm mb-3">
+        <ng-whiteboard  
+          style="height: 100%; width: 100%;"
+          class="whiteboard-box"  
+          [center]="true"
+          (dataChange)="onDataChange($event)" 
+          [options]="whiteboardOptions"> 
+        </ng-whiteboard>
+      </div>
+
+      <!-- Controls Below Canvas -->
+      <div class="d-flex justify-content-between  ">
+        <button class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0" (click)="Undo()">Undo</button>
+        <button class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0" (click)="clearBoard()">Clear</button>
+        <button class="btn btn-primary w-100 w-sm-auto" (click)="send()">Send Canvas</button>
+      </div>
     </div>
+ <!-- Right Panel: Chat -->
+<div class="col-md-3 col-sm-12 d-flex flex-column bg-white border-start p-3 chat-container">
+  
+  <!-- Chat Header -->
+  <div class="text-center bg-primary text-white rounded py-2 mb-3 shadow-sm">
+    <strong>{{ naam }}</strong>
+  </div>
+
+  <!-- Chat Messages: Scrollable -->
+  <div #chatContainer 
+       class="flex-grow-1 overflow-auto mb-3" 
+       style="min-height: 0;">
+    <div *ngFor="let msg of chats" 
+         class="d-flex mb-2" 
+         [ngClass]="msg.sender === user ? 'justify-content-end' : 'justify-content-start'">
+      <div class="p-2 rounded shadow-sm message-bubble"
+           [ngClass]="msg.sender === user ? 'bg-primary text-white' : 'bg-secondary text-white'"
+           style="max-width: 75%;">
+        <div class="fw-bold small">{{ msg.sender }}</div>
+        <div>{{ msg.message }}</div>
+        <div class="text-end small text-light">
+          {{ msg.sentAt | date : 'MMM d, y, h:mm a' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Input (Fixed at Bottom) -->
+  <div class="d-flex   chat-input">
+    <input type="text" class="form-control mb-2 mb-sm-0" placeholder="Type a message..." [(ngModel)]="message" (keydown.enter)="sendchat()" />
+    <button class="btn btn-success ms-sm-2 w-100 w-sm-auto" (click)="sendchat()">Send</button>
+  </div>
+
+</div>
+
+
 
   </div>
-</div> 
+</div>

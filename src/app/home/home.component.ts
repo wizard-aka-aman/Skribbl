@@ -30,6 +30,7 @@ export class HomeComponent implements OnInit {
   naam: any;
   chats: any[] = [];
   lastLength: number = 0;
+  activeUsers : any ;
 
   @ViewChild(NgWhiteboardComponent) whiteboard!: NgWhiteboardComponent;
   constructor(private router: ActivatedRoute, private whiteboardService: NgWhiteboardService, private serviceSrv: ServiceService) {
@@ -44,27 +45,36 @@ export class HomeComponent implements OnInit {
     console.log(this.groupId);
 
   }
-  ngOnInit(): void {
-    this.serviceSrv.startConnection(
-      this.groupId,
-      (groupId, data) => {
-        // Canvas updates
-        const current = this.whiteboard.data || [];
-        this.whiteboard.data = [...current, ...data];
-      },
-      (user: string, message: string, sentAt: string) => {
-        // Real-time chat
-        this.chats.push({ sender: user, message, sentAt });
-      }
-    ).then(() => {
-      // Fetch previous messages
-      this.serviceSrv.getMessages(this.groupId).subscribe((msgs: any) => {
-        this.chats = msgs;
-      });
-    });
+    async ngOnInit(): Promise<void> {
+  await this.serviceSrv.startConnection(
+    this.groupId,
+    this.user,
+    (groupId, data) => {
+      
+      const current = this.whiteboard.data || [];
+      this.whiteboard.data = [...current, ...data];
+    },
+    (user: string, message: string, sentAt: string) => {
+      this.chats.push({ sender: user, message, sentAt });
+    },
+    (users: string[]) => {
+      this.activeUsers = users;
+      console.log("Active users updated:", users);
+    }
+  );
 
-
+  try {
+    this.activeUsers = await this.serviceSrv.GetUsersInGroup(this.groupId);
+    console.log(this.activeUsers);
+  } catch (err) {
+    console.error('Failed to fetch users:', err);
   }
+
+  this.serviceSrv.getMessages(this.groupId).subscribe((msgs: any) => {
+    this.chats = msgs;
+  });
+}
+
 
 
   onDataChange(data: WhiteboardElement[]) {

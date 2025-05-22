@@ -21,4 +21,17 @@
     border-top: 1px solid #dee2e6;
     padding-top: 0.75rem;
   }
+
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .chat-container {
+      max-width: 100%;
+      height: auto;
+      border: none;
+      border-radius: 0;
+    }
+    .message-bubble {
+      max-width: 90%;
+    }
+  }
   
