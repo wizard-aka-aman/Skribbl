@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ServiceService } from '../service.service';
 import { ActivatedRoute } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr'; 
 @Component({
   selector: 'app-home',
   imports: [NgWhiteboardComponent, CommonModule, FormsModule],
@@ -29,25 +29,43 @@ export class HomeComponent implements OnInit {
   messages: any[] = [];
   message = '';
   naam: any;
-  chats: any[] = []; 
-  activeUsers: any = [];
+  chats: any[] = [];
+  activeUsers: string[] = [];
   randomWords: string[] = [
-    "apple", "car", "tree", "chair", "phone", "dog", "cat", "house", "lamp", "bicycle",
-    "pen", "book", "window", "table", "shoe", "clock", "mirror", "television", "refrigerator", "laptop",
-    "cup", "hat", "bag", "bus", "train", "fan", "door", "sofa", "bed", "toothbrush",
-    "bottle", "ball", "plate", "knife", "fork", "spoon", "sink", "oven", "microwave", "towel",
-    "carpet", "blanket", "pillow", "wallet", "watch", "glasses", "helmet", "jacket", "key", "notebook",
-    "printer", "mouse", "keyboard", "calendar", "plant", "flower", "bridge", "mountain", "river", "cloud",
-    "sun", "moon", "star", "airplane", "boat", "motorcycle", "truck", "garage", "building", "fence",
-    "road", "sidewalk", "bench", "statue", "painting", "camera", "ticket", "umbrella", "glove", "scarf",
-    "stove", "pan", "cupboard", "bucket", "mop", "broom", "vacuum", "remote", "speaker", "projector",
-    "mailbox", "fountain", "elevator", "stairs", "handrail", "curtain", "chalkboard", "whiteboard", "marker", "highlighter"
-  ] 
+    "chair", "table", "book", "pen", "notebook", "laptop", "keyboard", "mouse", "monitor", "phone",
+    "television", "remote", "sofa", "lamp", "fan", "air conditioner", "heater", "refrigerator", "microwave", "oven",
+    "stove", "dishwasher", "sink", "toilet", "bathtub", "shower", "towel", "toothbrush", "toothpaste", "mirror",
+    "comb", "hairdryer", "shampoo", "soap", "bed", "pillow", "blanket", "wardrobe", "hanger", "clock",
+    "calendar", "window", "curtain", "door", "doormat", "shoe", "sock", "shirt", "pants", "jacket",
+    "hat", "scarf", "glove", "belt", "watch", "wallet", "bag", "backpack", "bottle", "glass",
+    "cup", "plate", "bowl", "fork", "knife", "spoon", "napkin", "pan", "pot", "ladle",
+    "broom", "mop", "bucket", "vacuum", "duster", "bin", "newspaper", "magazine", "letter", "stamp",
+    "envelope", "scissors", "tape", "glue", "stapler", "paper", "printer", "scanner", "calculator", "ruler",
+    "eraser", "sharpener", "chalk", "board", "projector", "screen", "speaker", "microphone", "tripod", "camera",
+    "photo", "painting", "poster", "flag", "plant", "flower", "tree", "grass", "rock", "sand",
+    "cloud", "sun", "moon", "star", "rain", "snow", "umbrella", "boots", "car", "bus",
+    "bicycle", "motorcycle", "truck", "train", "tram", "subway", "aeroplane", "helicopter", "boat", "ship",
+    "bridge", "road", "highway", "traffic light", "sign", "crosswalk", "sidewalk", "building", "skyscraper", "house",
+    "apartment", "fence", "gate", "garage", "mailbox", "bench", "statue", "fountain", "swing", "slide",
+    "ladder", "toolbox", "hammer", "screwdriver", "wrench", "drill", "saw", "nail", "screw", "tape measure",
+    "paint", "brush", "roller", "canvas", "easel", "palette", "crayon", "marker", "highlighter", "whiteboard",
+    "chalkboard", "clipboard", "helmet", "glasses", "goggles", "mask", "first aid kit", "bandage", "thermometer", "medicine"
+  ]
   activeUsersChanges: any = {};
   isStarted: boolean = false
-  whoDraw : string = ""
-  
-  
+  whoDraw: string = ""
+  timer: number = 20;
+  counting: any;
+  groupTimer: number = 20;
+  groupPoints: any = {};
+  @ViewChild('modalbtn') modalbtn!: ElementRef<HTMLDivElement>;
+  selectedRandomWords : string[] = [];
+  userSelectedWord :string = ""
+
+  showWordSelectionModal: boolean = false;
+
+
+
   @ViewChild('chatContainer') chatContainer!: ElementRef<HTMLDivElement>;
   @ViewChild(NgWhiteboardComponent) whiteboard!: NgWhiteboardComponent;
   constructor(private router: ActivatedRoute, private toastr: ToastrService, private whiteboardService: NgWhiteboardService, private serviceSrv: ServiceService) {
@@ -62,17 +80,20 @@ export class HomeComponent implements OnInit {
     console.log(this.groupId);
 
   }
-  async ngOnInit(): Promise<void> {
+
+  async ngOnInit(): Promise<void> { 
     await this.serviceSrv.startConnection(
       this.groupId,
       this.user,
       (groupId, data) => {
 
-        const current = this.whiteboard.data || [];
-        this.whiteboard.data = [...current, ...data];
+        const currentUserent = this.whiteboard.data || [];
+        this.whiteboard.data = [...currentUserent, ...data];
       },
       (user: string, message: string, sentAt: string) => {
         this.chats.push({ sender: user, message, sentAt });
+        console.log(this.chats);
+        
         setTimeout(() => {
           const el = this.chatContainer.nativeElement;
           el.scrollTop = el.scrollHeight;
@@ -81,7 +102,8 @@ export class HomeComponent implements OnInit {
       (users: string[]) => {
         this.activeUsers = users;
         console.log("Active users updated:", users);
-      }
+      },
+
     );
 
     try {
@@ -94,34 +116,78 @@ export class HomeComponent implements OnInit {
     this.serviceSrv.getMessages(this.groupId).subscribe((msgs: any) => {
       this.chats = msgs;
     });
+
+    // 👇 ADD THIS: receive who is drawing
+    this.serviceSrv.hubConnection.on("ReceiveDrawer", (drawer: string) => {
+      this.selectedRandomWords = []
+      this.clearBoard();
+      this.userSelectedWord = ""
+      for (let index = 0; index < 3; index++) {
+      this.selectedRandomWords.push(this.randomWords[Math.floor(Math.random() * this.randomWords.length)])
+    } 
+    console.log(this.selectedRandomWords);
+    
+      if(this.user == drawer){
+        this.showWordSelectionModal = true;
+      }
+      this.toastr.info(`${drawer} is now drawing!`, "Drawing Turn");
+      this.whoDraw = drawer; // update who can draw
+    });
+    this.serviceSrv.hubConnection.on("ReceiveTimer", (timeLeft: number) => {
+      this.groupTimer = timeLeft;
+    });
+
+    this.serviceSrv.hubConnection.on("ReceivePoints", (points: any) => {
+      this.groupPoints = points;
+    });
+
+    this.serviceSrv.hubConnection.on("ReceiveGameStarted", () => {
+  this.isStarted = true; // Hide the Start button
+  this.toastr.info("Game has been started!", "Started");
+});
+
+this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: string, word: string) => {
+  this.toastr.success(`${guesser} guessed the word "${word}"!`, "Correct Guess");
+
+  // Optional: increase drawer's points
+  const drawerObj = this.activeUsersChanges.find((u:any) => u.user === guesser);
+  if (drawerObj) {
+    drawerObj.points += 5;
+    this.groupPoints = [...this.activeUsersChanges];
+    this.serviceSrv.broadcastPoints(this.groupId, this.groupPoints);
+  }
+});
+
+
     setTimeout(() => {
       const el = this.chatContainer.nativeElement;
       el.scrollTop = el.scrollHeight;
     }, 250);
+    
   }
 
 
 
   onDataChange(data: WhiteboardElement[]) {
-    this.data = data; 
+    this.data = data;
     console.log(this.data);
-    
-     
+
+
     // this.send();
     // localStorage.setItem('whiteboardData', JSON.stringify(data));
-  } 
+  }
 
   clearBoard() {
-   this.data = this.whiteboardService.clear();  
-   setTimeout(() => {
-      
-    this.send()
-  }, 100);
-}
-Undo() {
-  this.whiteboardService.undo(); 
-  setTimeout(() => {
-    this.send() 
+    this.data = this.whiteboardService.clear();
+    setTimeout(() => {
+
+      this.send()
+    }, 100);
+  }
+  Undo() {
+    this.whiteboardService.undo();
+    setTimeout(() => {
+      this.send()
     }, 100);
   }
 
@@ -133,6 +199,7 @@ Undo() {
     const sentAt = new Date().toLocaleString();
     if (this.message.trim()) {
       this.serviceSrv.sendMessage(this.groupId, this.user, this.message, sentAt);
+      console.log({groupid : this.groupId,user: this.user, message : this.message, sent:sentAt});   
       this.message = '';
     }
     setTimeout(() => {
@@ -144,31 +211,80 @@ Undo() {
     console.log(this.activeUsers);
     console.log((Math.random() * 100).toFixed(0));
     console.log(this.randomWords[Number.parseInt((Math.random() * 100).toFixed(0))]);
+    this.selectedRandomWords = [];
+    this.clearBoard();
+    this.userSelectedWord = ""
+    for (let index = 0; index < 3; index++) {
+      this.selectedRandomWords.push(this.randomWords[Number.parseInt((Math.random() * 100).toFixed(0))])
+    }
     if (this.activeUsers.length < 2) {
       this.toastr.warning("Cannot start a room with less than 2 Users !", "Warning")
       return;
-    }
-    this.toastr.success("Room Started Successfully !", "Success");
+    } 
+    this.serviceSrv.broadcastGameStarted(this.groupId); // 👈 Call this
     this.isStarted = true;
-    this.  activeUsersChanges = this.activeUsers.map((e:any)=> ({
-      user : e,
-      isDrawing : false ,
-      counter : 2
-    } ))
+    this.activeUsersChanges = this.activeUsers.map((e: any) => ({
+      user: e,
+      isDrawing: false,
+      counter: 2,
+      points: 0
+    }))
     console.log(this.activeUsersChanges);
+    this.groupPoints = this.activeUsersChanges
+ this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
+   
+    this.nextDrawer();
     
-    for (let index = 0; index < this.activeUsersChanges.length; index++) {
-      const element = this.activeUsersChanges[index];
-          element.isDrawing = true;
-          this.whoDraw = element.user;
-          
-          
-          
-    }
+  } 
+  nextDrawer() { 
+    const currentUser = this.activeUsersChanges.find((u: any) => !u.isDrawing);
+    console.log(currentUser);
+
+    if (!currentUser) {
+      this.toastr.info("All users have drawn once!", "Info");
+      this.isStarted = false
+      this.whoDraw = "";
+      return;
+    } 
+    currentUser.isDrawing = true;
+    this.whoDraw = currentUser.user;
+  // this.modalbtn.nativeElement.click();
+
+    // 📡 Optional: Send this info to all group members via SignalR
+    this.serviceSrv.broadcastDrawer(this.groupId, currentUser.user);
+    this.counting = setInterval(() => {
+      this.timer--;
+      this.serviceSrv.broadcastTimer(this.groupId, this.timer); // 🔁 real-time update
+      console.log(this.timer);
+      if (this.timer == 0) {
+        clearInterval(this.counting); 
+        this.timer = 20; 
+         this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
+         console.log(this.groupPoints);
+        //  this.selectedRandomWords = []  
+        this.nextDrawer();
+        
+        
+        return;
+      }
+    }, 1000)
+
 
   }
 
 
+
+selectedRandomWord(word: string) {
+  this.userSelectedWord = word;
+  this.showWordSelectionModal = false; // 👈 Hide modal
+  console.log("Selected word:", this.userSelectedWord);
+
+  // Optional: Broadcast the word selection
+  this.serviceSrv.broadcastSelectedWord(this.groupId, this.userSelectedWord);
+  this.serviceSrv.storeSelectedWord(this.groupId, word); // ✅ store word
+  this.serviceSrv.setCurrentDrawer(this.groupId, this.user); // ✅ store drawer
+ 
+}
 
 }
 

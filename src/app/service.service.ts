@@ -36,6 +36,9 @@ export class ServiceService {
       // Optionally remove from UI list of active users
       this.GetUsersInGroup(groupId).then(onUserListUpdate);
     }); 
+    this.hubConnection.on("ReceiveDrawer", (drawer: string) => {
+     console.log(`${drawer} is now drawing!`, "Drawing Turn");
+    });
 
     try {
       await this.hubConnection.start();
@@ -73,6 +76,11 @@ export class ServiceService {
   public PersonalChat(groupId: string, sender: string) {
     return this.http.get(`${this.baseUrl}/api/Chat/` + groupId + '/' + sender);
   }
+  public broadcastDrawer(groupId: string, drawer: string) {
+  if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+    this.hubConnection.invoke("BroadcastDrawer", groupId, drawer);
+  }
+}
   GetUsersInGroup(groupId: string): Promise<string[]> {
     return this.hubConnection.invoke('GetUsersInGroup', groupId) .then((users: string[]) => {
       return users;
@@ -82,8 +90,43 @@ export class ServiceService {
       return [];
     });;
   }
+  
+ 
+public broadcastTimer(groupId: string, timeLeft: number) {
+  if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+    this.hubConnection.invoke("BroadcastTimer", groupId, timeLeft);
+  }
+}
 
-  //api's
+public broadcastPoints(groupId: string, points: any) {
+  if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+    this.hubConnection.invoke("BroadcastPoints", groupId, points);
+  }
+}
+
+sendWordOptions(groupId: string, drawer: string, words: string[]) {
+  if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+    this.hubConnection.invoke("SendWordOptions", groupId, drawer, words);
+  }
+}
+
+broadcastSelectedWord(groupId: string, word: string) {
+  if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+    this.hubConnection.invoke("BroadcastSelectedWord", groupId, word);
+  }
+}
+broadcastGameStarted(groupId: string) {
+  this.hubConnection.invoke("BroadcastGameStarted", groupId)
+    .catch(err => console.error("Error broadcasting game start:", err));
+}
+
+storeSelectedWord(groupId: string, word: string) {
+  this.hubConnection.invoke("StoreSelectedWord", groupId, word);
+}
+
+setCurrentDrawer(groupId: string, user: string) {
+  this.hubConnection.invoke("SetCurrentDrawer", groupId, user);
+}
 
 
 }

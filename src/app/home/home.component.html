@@ -1,6 +1,16 @@
 <div class="container-fluid   overflow-hidden">
   <div class="row  ">
 
+{{groupTimer}} 
+      <div class="points-board">
+  <h3>Points:</h3>
+  <ul>
+    <li *ngFor="let user of groupPoints">
+      {{ user.user }}: {{ user.points }} points
+    </li>
+  </ul>
+</div>
+
     <!-- Left Panel: Active Users -->
     <div class="col-md-2 col-sm-12 bg-light border-end d-flex flex-column p-3">
       <h5 class="text-center mb-3">Active Users</h5>
@@ -16,22 +26,23 @@
     <div class="col-md-7 col-sm-12 d-flex flex-column p-3">
       <div  class="flex-grow-1  border rounded shadow-sm mb-3">
        <div   *ngIf="!isStarted"> Start a game with  {{activeUsers.length}} users : <button class="btn btn-outline-secondary w-10 " (click)="start()">Start</button></div>
+       <div   *ngIf="isStarted"> {{userSelectedWord}}</div>
         <ng-whiteboard  
         (mouseup)="send()"
           style="height: 100%; width: 100%;"
           class="whiteboard-box"  
           [center]="true"
           (dataChange)="onDataChange($event)" 
-          [drawingEnabled]="whoDraw == user?true:false"
+          [drawingEnabled]="whoDraw == user?true:false "
           [options]="whiteboardOptions"> 
         </ng-whiteboard>
       </div>
 
       <!-- Controls Below Canvas -->
       <div class="d-flex justify-content-between  ">
-        <button class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0" (click)="Undo() ">Undo</button>
-        <button class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0" (click)="clearBoard()">Clear</button>
-        <button class="btn btn-primary w-100 w-sm-auto" (click)="send()">Send Canvas</button>
+        <button class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0" [disabled]="whoDraw != user" (click)="Undo() ">Undo</button>
+        <button class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0" [disabled]="whoDraw != user" (click)="clearBoard()">Clear</button>
+        <button class="btn btn-primary w-100 w-sm-auto" [disabled]="whoDraw != user" (click)="send()">Send Canvas</button>
       </div>
     </div>
  <!-- Right Panel: Chat -->
@@ -64,7 +75,7 @@
   <!-- Chat Input (Fixed at Bottom) -->
   <div class="d-flex   chat-input">
     <input type="text" class="form-control mb-2 mb-sm-0" placeholder="Type a message..." [(ngModel)]="message" (keydown.enter)="sendchat()" />
-    <button class="btn btn-success ms-sm-2 w-100 w-sm-auto" (click)="sendchat()">Send</button>
+    <button class="btn btn-success ms-sm-2 w-100 w-sm-auto" [disabled]="whoDraw == user" (click)="sendchat()">Send</button>
   </div>
 
 </div>
@@ -73,25 +84,22 @@
 
   </div>
 </div>
-
- <!-- Button trigger modal -->
-<button  #modalbtn  type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-  Launch static backdrop modal
-</button>
 
 <!-- Modal -->
-<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog">
+<div class="modal fade show d-block" *ngIf="showWordSelectionModal" id="staticBackdrop" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h1 class="modal-title fs-5">Choose a Word to Draw</h1> 
       </div>
       <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> 
+        <div class="d-flex flex-column gap-2">
+          <button *ngFor="let item of selectedRandomWords"
+                  class="btn btn-outline-primary"
+                  (click)="selectedRandomWord(item)">
+            {{ item }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
