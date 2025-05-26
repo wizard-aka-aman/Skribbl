@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { LayoutComponent } from './layout/layout.component';
+import { PagenotfoundComponent } from './pagenotfound/pagenotfound.component';
 
 export const routes: Routes = [
     {
@@ -10,5 +11,9 @@ export const routes: Routes = [
     {
         path: 'layout',
         component:LayoutComponent
+    },{
+        path: '**',
+        component: PagenotfoundComponent,
     }
+    
 ];
