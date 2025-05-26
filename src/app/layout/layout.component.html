@@ -3,28 +3,19 @@
     <h1>Skribbl Game</h1>
 
     <div class="button-group">
-      <button class="action-btn" (click)="createRoom()">Create Room</button>
+      <button class="action-btn"   data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="createRoom()">Create Room</button>
       <button class="action-btn" data-bs-toggle="modal" data-bs-target="#exampleModal"  >Join Room</button>
     </div>
-
-    <div
-      *ngIf="groupId"
-      class="alert m-3 alert-success d-flex justify-content-between align-items-center"
-    >
-      <span><strong>Group ID:</strong> <br> {{ groupId }}</span>
-      <button class="btn btn-outline-secondary btn-sm" (click)="copygroupId()">
-        Copy
-      </button>
-    </div>
+ 
   </div>
 </div> 
 
 <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabelcreate" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Join Room</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -33,7 +24,61 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"  [routerLink]="['/home']"[queryParams]="{groupId : userinput , user : user}"  >Join Room</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"  (click)="GetJoinGroup()" >Join Room</button>
+      </div>
+    </div>
+  </div>
+</div> 
+
+<!-- Create view Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Create Room</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">
+           <span> Group ID:  <br> {{ groupId }}</span>
+          </h1> <button class=" btn btn-outline-secondary btn-sm" (click)="copygroupId()">
+        Copy
+      </button>
+      <div class="form-group">
+        <label for="exampleFormControlInput1">Name : </label>
+        <input type="text" class="form-control" [(ngModel)]="user"   placeholder="Enter Your Name">
+       </div>
+        <div class="form-group">
+              <label for="exampleFormControlSelect1">Timer</label>
+              <select class="form-control" [(ngModel)] ="timer" id="exampleFormControlSelect1">
+                <option value="20">20</option>
+                <option value="40">40</option>
+                <option value="60">60</option>
+                <option value="80">80</option>
+                <option value="100">100</option> 
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="exampleFormControlSelect1">Rounds</label>
+              <select class="form-control" [(ngModel)] ="rounds"> 
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option> 
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="exampleFormControlSelect1">WordCount</label>
+              <select class="form-control" [(ngModel)] ="wordCount">
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option> 
+              </select>
+            </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="PostApiCreateRoom()"  >CreateRoom</button>
       </div>
     </div>
   </div>

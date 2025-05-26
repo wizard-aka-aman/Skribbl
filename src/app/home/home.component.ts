@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ServiceService } from '../service.service';
 import { ActivatedRoute } from '@angular/router';
-import { ToastrService } from 'ngx-toastr'; 
+import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-home',
   imports: [NgWhiteboardComponent, CommonModule, FormsModule],
@@ -20,11 +20,12 @@ export class HomeComponent implements OnInit {
     backgroundColor: 'rgb(224, 224, 224)',
     strokeColor: '#000',
     strokeWidth: 2,
-    canvasHeight: 500,
+    canvasHeight: 400,
     canvasWidth: 600
   };
   data: any;
   groupId: string = '';
+  group: any;
   user: string = '';
   messages: any[] = [];
   message = '';
@@ -54,16 +55,21 @@ export class HomeComponent implements OnInit {
   activeUsersChanges: any = {};
   isStarted: boolean = false
   whoDraw: string = ""
-  timer: number = 20;
+  timer: number = 0;
   counting: any;
-  groupTimer: number = 20;
+  groupTimer: number = 5;
   groupPoints: any = {};
   @ViewChild('modalbtn') modalbtn!: ElementRef<HTMLDivElement>;
-  selectedRandomWords : string[] = [];
-  userSelectedWord :string = ""
-
+  selectedRandomWords: string[] = [];
+  userSelectedWord: string = ""
+  winnerModalVisible = false;
+  winner: any = null;
+  isUserGuess: boolean = false;
   showWordSelectionModal: boolean = false;
-
+  CreatedBy: string = ""
+  round :number = 1;
+  totalRound : number = 0;
+  guessWordLength :number = 0
 
 
   @ViewChild('chatContainer') chatContainer!: ElementRef<HTMLDivElement>;
@@ -79,9 +85,22 @@ export class HomeComponent implements OnInit {
     console.log(this.user);
     console.log(this.groupId);
 
+    this.serviceSrv.getGroup(this.groupId).subscribe((res: any) => {
+      this.group = res[0];
+      console.log(res);
+      console.log(this.group.timer);
+      this.CreatedBy = this.group.createdBy
+      console.log(this.CreatedBy);
+
+      this.groupTimer = this.group.timer;
+      this.totalRound = this.group.rounds
+      console.log(this.totalRound);
+      
+    })
+
   }
 
-  async ngOnInit(): Promise<void> { 
+  async ngOnInit(): Promise<void> {
     await this.serviceSrv.startConnection(
       this.groupId,
       this.user,
@@ -93,7 +112,7 @@ export class HomeComponent implements OnInit {
       (user: string, message: string, sentAt: string) => {
         this.chats.push({ sender: user, message, sentAt });
         console.log(this.chats);
-        
+
         setTimeout(() => {
           const el = this.chatContainer.nativeElement;
           el.scrollTop = el.scrollHeight;
@@ -102,6 +121,7 @@ export class HomeComponent implements OnInit {
       (users: string[]) => {
         this.activeUsers = users;
         console.log("Active users updated:", users);
+
       },
 
     );
@@ -122,15 +142,18 @@ export class HomeComponent implements OnInit {
       this.selectedRandomWords = []
       this.clearBoard();
       this.userSelectedWord = ""
-      for (let index = 0; index < 3; index++) {
-      this.selectedRandomWords.push(this.randomWords[Math.floor(Math.random() * this.randomWords.length)])
-    } 
-    console.log(this.selectedRandomWords);
-    
-      if(this.user == drawer){
+      this.isUserGuess = false
+      for (let index = 0; index < this.group.wordCount; index++) {
+        this.selectedRandomWords.push(this.randomWords[Math.floor(Math.random() * this.randomWords.length)])
+      }
+      console.log(this.selectedRandomWords);
+
+      if (this.user == drawer) {
         this.showWordSelectionModal = true;
       }
       this.toastr.info(`${drawer} is now drawing!`, "Drawing Turn");
+
+
       this.whoDraw = drawer; // update who can draw
     });
     this.serviceSrv.hubConnection.on("ReceiveTimer", (timeLeft: number) => {
@@ -140,30 +163,46 @@ export class HomeComponent implements OnInit {
     this.serviceSrv.hubConnection.on("ReceivePoints", (points: any) => {
       this.groupPoints = points;
     });
+   this.serviceSrv.hubConnection.on("ReceiveRoundEnded", (round: string) => {
+    this.round ++;
+  this.toastr.info(`${round} has ended!`, "Round Update");
+});
 
     this.serviceSrv.hubConnection.on("ReceiveGameStarted", () => {
-  this.isStarted = true; // Hide the Start button
-  this.toastr.info("Game has been started!", "Started");
-});
+      this.isStarted = true; // Hide the Start button
+      this.toastr.info("Game has been started!", "Started");
+    });
+    this.serviceSrv.hubConnection.on("ReceiveGameEnded", (winner: any) => {
+      this.winnerModalVisible = true // Hide the Start button
+      this.winner = winner
+      this.toastr.info("Game has been Ended!", "Started");
+    });
+    this.serviceSrv.hubConnection.on("ReceiveSelectedWord", (word: string) => {
+      this.guessWordLength = word.length;
+      // this.toastr.info("Word!", word);
+    });
 
-this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: string, word: string) => {
-  this.toastr.success(`${guesser} guessed the word "${word}"!`, "Correct Guess");
 
-  // Optional: increase drawer's points
-  const drawerObj = this.activeUsersChanges.find((u:any) => u.user === guesser);
-  if (drawerObj) {
-    drawerObj.points += 5;
-    this.groupPoints = [...this.activeUsersChanges];
-    this.serviceSrv.broadcastPoints(this.groupId, this.groupPoints);
-  }
-});
+    this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: string, word: string) => {
+      this.toastr.success(`${guesser} guessed the word!`, "Correct Guess");
+      if (this.user == guesser) {
+        this.isUserGuess = true;
+      }
+      // Optional: increase drawer's points
+      const drawerObj = this.activeUsersChanges.find((u: any) => u.user === guesser);
+      if (drawerObj) {
+        drawerObj.points += 1;
+        this.groupPoints = [...this.activeUsersChanges];
+        this.serviceSrv.broadcastPoints(this.groupId, this.groupPoints);
+      }
+    });
 
 
     setTimeout(() => {
       const el = this.chatContainer.nativeElement;
       el.scrollTop = el.scrollHeight;
     }, 250);
-    
+
   }
 
 
@@ -171,10 +210,6 @@ this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: st
   onDataChange(data: WhiteboardElement[]) {
     this.data = data;
     console.log(this.data);
-
-
-    // this.send();
-    // localStorage.setItem('whiteboardData', JSON.stringify(data));
   }
 
   clearBoard() {
@@ -197,9 +232,11 @@ this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: st
 
   sendchat() {
     const sentAt = new Date().toLocaleString();
+    console.log(this.userSelectedWord);
+
     if (this.message.trim()) {
       this.serviceSrv.sendMessage(this.groupId, this.user, this.message, sentAt);
-      console.log({groupid : this.groupId,user: this.user, message : this.message, sent:sentAt});   
+      console.log({ groupid: this.groupId, user: this.user, message: this.message, sent: sentAt });
       this.message = '';
     }
     setTimeout(() => {
@@ -208,63 +245,85 @@ this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: st
     }, 50);
   }
   start() {
+
     console.log(this.activeUsers);
     console.log((Math.random() * 100).toFixed(0));
     console.log(this.randomWords[Number.parseInt((Math.random() * 100).toFixed(0))]);
     this.selectedRandomWords = [];
     this.clearBoard();
+    this.round = 1;
     this.userSelectedWord = ""
-    for (let index = 0; index < 3; index++) {
+    for (let index = 0; index < this.group.wordCount; index++) {
       this.selectedRandomWords.push(this.randomWords[Number.parseInt((Math.random() * 100).toFixed(0))])
     }
     if (this.activeUsers.length < 2) {
       this.toastr.warning("Cannot start a room with less than 2 Users !", "Warning")
       return;
-    } 
+    }
     this.serviceSrv.broadcastGameStarted(this.groupId); // 👈 Call this
     this.isStarted = true;
-    this.activeUsersChanges = this.activeUsers.map((e: any) => ({
+
+   if(Object.keys(this.activeUsersChanges).length===0){
+     this.activeUsersChanges = this.activeUsers.map((e: any) => ({
       user: e,
       isDrawing: false,
-      counter: 2,
+      counter: this.group.rounds,
       points: 0
     }))
+   }else{
+    for (let key in this.activeUsersChanges) {
+    this.activeUsersChanges[key].isDrawing = false;
+    this.activeUsersChanges[key].counter = this.group.rounds
+    }
+   }
+
     console.log(this.activeUsersChanges);
     this.groupPoints = this.activeUsersChanges
- this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
-   
+    this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
+
     this.nextDrawer();
-    
-  } 
-  nextDrawer() { 
+
+  }
+  nextDrawer() {
     const currentUser = this.activeUsersChanges.find((u: any) => !u.isDrawing);
+    const changeisDrawingToFalse = this.activeUsersChanges.find((u: any) => u.counter != 0);
     console.log(currentUser);
 
     if (!currentUser) {
+      if (changeisDrawingToFalse) {
+        const roundMessage = `Round ${this.group.rounds - changeisDrawingToFalse.counter}`;
+        this.serviceSrv.broadcastRoundEnded(this.groupId, roundMessage); 
+        this.activeUsersChanges.forEach((user: any) => user.isDrawing = false);
+        this.nextDrawer();
+        return;
+
+      }
       this.toastr.info("All users have drawn once!", "Info");
       this.isStarted = false
-      this.whoDraw = "";
-      return;
-    } 
-    currentUser.isDrawing = true;
-    this.whoDraw = currentUser.user;
-  // this.modalbtn.nativeElement.click();
+      this.showWinnerModal();
+      console.log(this.groupPoints);
 
+      return;
+    }
+    currentUser.isDrawing = true;
+
+    currentUser.counter--;
+
+    this.whoDraw = currentUser.user;
     // 📡 Optional: Send this info to all group members via SignalR
     this.serviceSrv.broadcastDrawer(this.groupId, currentUser.user);
+    this.timer = this.group.timer
     this.counting = setInterval(() => {
       this.timer--;
       this.serviceSrv.broadcastTimer(this.groupId, this.timer); // 🔁 real-time update
       console.log(this.timer);
       if (this.timer == 0) {
-        clearInterval(this.counting); 
-        this.timer = 20; 
-         this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
-         console.log(this.groupPoints);
+        clearInterval(this.counting);
+        this.timer = this.group.timer;
+        this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
+        console.log(this.groupPoints);
         //  this.selectedRandomWords = []  
         this.nextDrawer();
-        
-        
         return;
       }
     }, 1000)
@@ -274,17 +333,32 @@ this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: st
 
 
 
-selectedRandomWord(word: string) {
-  this.userSelectedWord = word;
-  this.showWordSelectionModal = false; // 👈 Hide modal
-  console.log("Selected word:", this.userSelectedWord);
+  selectedRandomWord(word: string) {
+    this.userSelectedWord = word;
+    this.showWordSelectionModal = false; // 👈 Hide modal
+    console.log("Selected word:", this.userSelectedWord);
 
-  // Optional: Broadcast the word selection
-  this.serviceSrv.broadcastSelectedWord(this.groupId, this.userSelectedWord);
-  this.serviceSrv.storeSelectedWord(this.groupId, word); // ✅ store word
-  this.serviceSrv.setCurrentDrawer(this.groupId, this.user); // ✅ store drawer
- 
-}
+    // Optional: Broadcast the word selection
+    this.serviceSrv.broadcastSelectedWord(this.groupId, this.userSelectedWord);
+    this.serviceSrv.storeSelectedWord(this.groupId, word); // ✅ store word
+    this.serviceSrv.setCurrentDrawer(this.groupId, this.user); // ✅ store drawer
+
+  }
+
+  showWinnerModal() {
+    const maxPointsUser = this.groupPoints.reduce((max: any, user: any) =>
+      user.points > max.points ? user : max, this.groupPoints[0]);
+
+    this.winner = maxPointsUser;
+    this.winnerModalVisible = true;
+    this.serviceSrv.broadcastGameEnded(this.groupId, this.winner);
+  }
+
+  restartGame() {
+    this.winnerModalVisible = false;
+
+  }
+
 
 }
 

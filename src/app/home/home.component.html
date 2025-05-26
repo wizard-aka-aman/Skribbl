@@ -1,7 +1,18 @@
 <div class="container-fluid   overflow-hidden">
   <div class="row  ">
 
-{{groupTimer}} 
+
+    <!-- Left Panel: Active Users -->
+    <div class="col-md-2 col-sm-12 bg-light border-end d-flex flex-column p-3">
+      <div class="text-center fs-2 "> Timer : {{groupTimer}} </div>
+      <h5 class="text-center mb-3">Active Users</h5>
+      <div class="flex-grow-1 overflow-auto">
+        <div *ngFor="let item of activeUsers" class="mb-2">
+          <span class="badge bg-primary" *ngIf="item === user"><b>{{ item }} (You)</b></span>
+          <span class="badge bg-secondary" *ngIf="item !== user">{{ item }}</span>
+        </div>  
+      </div>
+      
       <div class="points-board">
   <h3>Points:</h3>
   <ul>
@@ -11,25 +22,24 @@
   </ul>
 </div>
 
-    <!-- Left Panel: Active Users -->
-    <div class="col-md-2 col-sm-12 bg-light border-end d-flex flex-column p-3">
-      <h5 class="text-center mb-3">Active Users</h5>
-      <div class="flex-grow-1 overflow-auto">
-        <div *ngFor="let item of activeUsers" class="mb-2">
-          <span class="badge bg-primary" *ngIf="item === user"><b>{{ item }} (You)</b></span>
-          <span class="badge bg-secondary" *ngIf="item !== user">{{ item }}</span>
-        </div>
-      </div>
     </div>
 
     <!-- Center Panel: Canvas -->
     <div class="col-md-7 col-sm-12 d-flex flex-column p-3">
+      <div class="fs-3 text-center">Round {{round}} of {{totalRound}}</div>
+      
       <div  class="flex-grow-1  border rounded shadow-sm mb-3">
-       <div   *ngIf="!isStarted"> Start a game with  {{activeUsers.length}} users : <button class="btn btn-outline-secondary w-10 " (click)="start()">Start</button></div>
-       <div   *ngIf="isStarted"> {{userSelectedWord}}</div>
+       <div class="text-center"  *ngIf="!isStarted && user==CreatedBy"> Start a game with  {{activeUsers.length}} users : <button class="btn btn-outline-secondary w-10 " (click)="start()">Start</button></div>
+        
+       <div   *ngIf="isStarted" class="text-center fs-3 "> {{userSelectedWord}}</div>
+       <div   *ngIf="whoDraw != user && isStarted" class="text-center fs-3 "> 
+          <span *ngFor="let _ of [].constructor(guessWordLength)">_ </span>
+          {{guessWordLength}}
+       </div>
         <ng-whiteboard  
+        
         (mouseup)="send()"
-          style="height: 100%; width: 100%;"
+          style="height: 95%; width: 100%;"
           class="whiteboard-box"  
           [center]="true"
           (dataChange)="onDataChange($event)" 
@@ -74,8 +84,8 @@
 
   <!-- Chat Input (Fixed at Bottom) -->
   <div class="d-flex   chat-input">
-    <input type="text" class="form-control mb-2 mb-sm-0" placeholder="Type a message..." [(ngModel)]="message" (keydown.enter)="sendchat()" />
-    <button class="btn btn-success ms-sm-2 w-100 w-sm-auto" [disabled]="whoDraw == user" (click)="sendchat()">Send</button>
+    <input type="text" class="form-control mb-2 mb-sm-0" [disabled]="whoDraw == user || isUserGuess"  placeholder="Type a message..." [(ngModel)]="message" (keydown.enter)="sendchat()" />
+    <button class="btn btn-success ms-sm-2 w-100 w-sm-auto" [disabled]="whoDraw == user || isUserGuess" (click)="sendchat()">Send</button>
   </div>
 
 </div>
@@ -104,3 +114,23 @@
     </div>
   </div>
 </div>
+
+<!-- Winner Modal -->
+<div class="modal fade show d-block" *ngIf="winnerModalVisible" tabindex="-1" style="background: rgba(0,0,0,0.6); z-index: 1055;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">🎉 Game Over!</h5>
+      </div>
+      <div class="modal-body">
+        <p class="fs-5 mb-1">🏆 Winner:</p>
+        <h4 class="fw-bold text-primary">{{ winner?.user }}</h4>
+        <p class="text-muted">with <strong>{{ winner?.points }}</strong> points!</p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button class="btn btn-primary" (click)="restartGame()">Play Again</button>
+      </div>
+    </div>
+  </div>
+</div>
+

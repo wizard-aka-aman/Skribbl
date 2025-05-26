@@ -65,7 +65,7 @@ export class ServiceService {
       console.warn("SignalR not connected. Message not sent.");
     }
   }
-  private saveMessage(message: any) {
+  public saveMessage(message: any) {
     return this.http.post(`${this.baseUrl}/api/Chat`, message).subscribe();
   }
 
@@ -119,6 +119,14 @@ broadcastGameStarted(groupId: string) {
   this.hubConnection.invoke("BroadcastGameStarted", groupId)
     .catch(err => console.error("Error broadcasting game start:", err));
 }
+broadcastGameEnded(groupId: string , winner: any) {
+  this.hubConnection.invoke("BroadcastGameEnded", groupId , winner)
+    .catch(err => console.error("Error broadcasting game start:", err));
+}
+broadcastRoundEnded(groupId: string , round: string) {
+  this.hubConnection.invoke("BroadcastRoundEnded", groupId , round)
+    .catch(err => console.error("Error broadcasting Round Ended:", err));
+}
 
 storeSelectedWord(groupId: string, word: string) {
   this.hubConnection.invoke("StoreSelectedWord", groupId, word);
@@ -128,5 +136,12 @@ setCurrentDrawer(groupId: string, user: string) {
   this.hubConnection.invoke("SetCurrentDrawer", groupId, user);
 }
 
+// api's
 
+public postCreateGroup(form : any){
+  return this.http.post("https://localhost:7263/api/Game/CreateRoom", form)
+}
+public getGroup(name:string){
+  return this.http.get("https://localhost:7263/api/Game/GetRoom/"+name);
+}
 }
