@@ -34,4 +34,25 @@
       max-width: 90%;
     }
   }
-  
+  .canvas-wrapper {
+  height: 700px; /* Default height */
+}
+
+@media (max-width: 768px) {
+  .canvas-wrapper {
+    height: 500px; /* Increase height on tablets and smaller */
+  }
+}
+
+@media (max-width: 576px) {
+  .canvas-wrapper {
+    height: 600px; /* Even more height on phones */
+  }
+}
+
+.whiteboard-box {
+  width: 100%;
+  height: 100% ;
+  display: block;
+  box-sizing: border-box;
+}
