@@ -9,7 +9,8 @@ export class ServiceService {
 
   hubConnection!: signalR.HubConnection;
 
-  baseUrl = 'https://localhost:7263'; // local server as needed
+  // baseUrl = 'https://localhost:7263'; // local server as needed
+  baseUrl = 'https://hepefek442.bsite.net'; // Global  server as needed
   pen: any
   users: any;
   
@@ -139,9 +140,9 @@ setCurrentDrawer(groupId: string, user: string) {
 // api's
 
 public postCreateGroup(form : any){
-  return this.http.post("https://localhost:7263/api/Game/CreateRoom", form)
+  return this.http.post(`${this.baseUrl}/api/Game/CreateRoom`, form)
 }
 public getGroup(name:string){
-  return this.http.get("https://localhost:7263/api/Game/GetRoom/"+name);
+  return this.http.get(`${this.baseUrl}/api/Game/GetRoom/`+name);
 }
 }

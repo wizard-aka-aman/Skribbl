@@ -1,15 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common'; 
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {   Router, RouterLink } from '@angular/router';
-import { HttpClient } from '@microsoft/signalr';
+import {   Router  } from '@angular/router'; 
 import { ToastrService } from 'ngx-toastr';
 import { ServiceService } from '../service.service';
 
 @Component({
   selector: 'app-layout',
-  imports: [CommonModule , RouterLink , FormsModule  ],
+  imports: [CommonModule   , FormsModule  ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.css'
 })
