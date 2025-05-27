@@ -41,24 +41,38 @@ export class LayoutComponent {
     this.createRoomBody.CreatedBy = this.user;
     console.log(this.createRoomBody);
 
-      this.serviceSrv.postCreateGroup(this.createRoomBody).subscribe((res:any)=>{
-        console.log(res);
-        this.route.navigate(['/home'], { queryParams: {  groupId: this.groupId, user: this.user } });
-      }) 
+      this.serviceSrv.postCreateGroup(this.createRoomBody).subscribe({
+  next: (res: any) => {
+    console.log(res);
+    this.route.navigate(['/home'], { queryParams: { groupId: this.groupId, user: this.user } });
+  },
+  error: (err: any) => {
+    console.error('Error creating group:', err);
+     this.toastr.error("Something went wrong. Please try again.",  'https://hepefek442.bsite.net/');
+    // You can also add additional error handling logic here, like displaying a message to the user
+  }
+});
+
   }
   GetJoinGroup(){
-    this.serviceSrv.getGroup(this.userinput).subscribe((res:any)=>{
-      console.log(res);
-      
-      console.log(Object.keys(res).length); 
-      if(Object.keys(res).length == 0){
-        this.toastr.error("Group not found" ,"Error")
-      }
-      else{
-        this.toastr.success("Group Joined" ,"Success")
-         this.route.navigate(['/home'], { queryParams: {  groupId: this.userinput, user: this.user } });
-      }
-    })
+    this.serviceSrv.getGroup(this.userinput).subscribe({
+  next: (res: any) => {
+    console.log(res);
+    console.log(Object.keys(res).length);
+
+    if (Object.keys(res).length === 0) {
+      this.toastr.error("Group not found", "Error");
+    } else {
+      this.toastr.success("Group Joined", "Success");
+      this.route.navigate(['/home'], { queryParams: { groupId: this.userinput, user: this.user } });
+    }
+  },
+  error: (err: any) => {
+    console.error('Error retrieving group:', err);
+    this.toastr.error("Something went wrong. Please try again.",  'https://hepefek442.bsite.net/');
+  }
+});
+
   }
 
 }
