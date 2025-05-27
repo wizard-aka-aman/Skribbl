@@ -7,10 +7,14 @@ export const routes: Routes = [
     {
         path: 'home',
         component:HomeComponent
-    },
+    }, {
+        path: '',
+        redirectTo : 'layout',
+        pathMatch : 'full'
+    } ,
     {
-        path: '/',
-        component:LayoutComponent
+        path: 'layout',
+        component : LayoutComponent
     },{
         path: '**',
         component: PagenotfoundComponent,
