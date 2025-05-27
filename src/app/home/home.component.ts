@@ -67,9 +67,12 @@ export class HomeComponent implements OnInit {
   isUserGuess: boolean = false;
   showWordSelectionModal: boolean = false;
   CreatedBy: string = ""
-  round :number = 1;
-  totalRound : number = 0;
-  guessWordLength :number = 0
+  round: number = 1;
+  totalRound: number = 0;
+  guessWordLength: number = 0
+  guessedUsers: Set<string> = new Set();
+
+
 
 
   @ViewChild('chatContainer') chatContainer!: ElementRef<HTMLDivElement>;
@@ -95,7 +98,7 @@ export class HomeComponent implements OnInit {
       this.groupTimer = this.group.timer;
       this.totalRound = this.group.rounds
       console.log(this.totalRound);
-      
+
     })
 
   }
@@ -143,9 +146,7 @@ export class HomeComponent implements OnInit {
       this.clearBoard();
       this.userSelectedWord = ""
       this.isUserGuess = false
-      for (let index = 0; index < this.group.wordCount; index++) {
-        this.selectedRandomWords.push(this.randomWords[Math.floor(Math.random() * this.randomWords.length)])
-      }
+      this.selectedRandomWords = this.getUniqueRandomWords(this.group.wordCount);
       console.log(this.selectedRandomWords);
 
       if (this.user == drawer) {
@@ -163,10 +164,10 @@ export class HomeComponent implements OnInit {
     this.serviceSrv.hubConnection.on("ReceivePoints", (points: any) => {
       this.groupPoints = points;
     });
-   this.serviceSrv.hubConnection.on("ReceiveRoundEnded", (round: string) => {
-    this.round ++;
-  this.toastr.info(`${round} has ended!`, "Round Update");
-});
+    this.serviceSrv.hubConnection.on("ReceiveRoundEnded", (round: string) => {
+      this.round++;
+      this.toastr.info(`${round} has ended!`, "Round Update");
+    });
 
     this.serviceSrv.hubConnection.on("ReceiveGameStarted", () => {
       this.isStarted = true; // Hide the Start button
@@ -188,6 +189,8 @@ export class HomeComponent implements OnInit {
       if (this.user == guesser) {
         this.isUserGuess = true;
       }
+
+      this.guessedUsers.add(guesser)
       // Optional: increase drawer's points
       const drawerObj = this.activeUsersChanges.find((u: any) => u.user === guesser);
       if (drawerObj) {
@@ -195,6 +198,28 @@ export class HomeComponent implements OnInit {
         this.groupPoints = [...this.activeUsersChanges];
         this.serviceSrv.broadcastPoints(this.groupId, this.groupPoints);
       }
+      // Check if all users except the drawer have guessed
+      const usersToGuess = this.activeUsers.filter(u => u !== drawer);
+      console.log(usersToGuess);
+      
+      const allGuessed = usersToGuess.every(user => this.guessedUsers.has(user));
+      console.log(allGuessed);
+
+      if (allGuessed) {
+        // Clear the guessed users set for the next round
+        this.guessedUsers.clear();
+
+        // Stop current timer interval (if running)
+        if (this.counting) {
+          clearInterval(this.counting);
+          this.timer = this.group.timer;
+          this.serviceSrv.broadcastTimer(this.groupId, this.timer);
+        }
+
+        // Move to next drawer
+        this.nextDrawer();
+      }
+
     });
 
 
@@ -209,7 +234,7 @@ export class HomeComponent implements OnInit {
 
   onDataChange(data: WhiteboardElement[]) {
     this.data = data;
-    console.log(this.data);
+    // console.log(this.data);
   }
 
   clearBoard() {
@@ -253,9 +278,7 @@ export class HomeComponent implements OnInit {
     this.clearBoard();
     this.round = 1;
     this.userSelectedWord = ""
-    for (let index = 0; index < this.group.wordCount; index++) {
-      this.selectedRandomWords.push(this.randomWords[Number.parseInt((Math.random() * 100).toFixed(0))])
-    }
+    this.selectedRandomWords = this.getUniqueRandomWords(this.group.wordCount);
     if (this.activeUsers.length < 2) {
       this.toastr.warning("Cannot start a room with less than 2 Users !", "Warning")
       return;
@@ -263,19 +286,19 @@ export class HomeComponent implements OnInit {
     this.serviceSrv.broadcastGameStarted(this.groupId); // 👈 Call this
     this.isStarted = true;
 
-   if(Object.keys(this.activeUsersChanges).length===0){
-     this.activeUsersChanges = this.activeUsers.map((e: any) => ({
-      user: e,
-      isDrawing: false,
-      counter: this.group.rounds,
-      points: 0
-    }))
-   }else{
-    for (let key in this.activeUsersChanges) {
-    this.activeUsersChanges[key].isDrawing = false;
-    this.activeUsersChanges[key].counter = this.group.rounds
+    if (Object.keys(this.activeUsersChanges).length === 0) {
+      this.activeUsersChanges = this.activeUsers.map((e: any) => ({
+        user: e,
+        isDrawing: false,
+        counter: this.group.rounds,
+        points: 0
+      }))
+    } else {
+      for (let key in this.activeUsersChanges) {
+        this.activeUsersChanges[key].isDrawing = false;
+        this.activeUsersChanges[key].counter = this.group.rounds
+      }
     }
-   }
 
     console.log(this.activeUsersChanges);
     this.groupPoints = this.activeUsersChanges
@@ -292,7 +315,7 @@ export class HomeComponent implements OnInit {
     if (!currentUser) {
       if (changeisDrawingToFalse) {
         const roundMessage = `Round ${this.group.rounds - changeisDrawingToFalse.counter}`;
-        this.serviceSrv.broadcastRoundEnded(this.groupId, roundMessage); 
+        this.serviceSrv.broadcastRoundEnded(this.groupId, roundMessage);
         this.activeUsersChanges.forEach((user: any) => user.isDrawing = false);
         this.nextDrawer();
         return;
@@ -359,6 +382,20 @@ export class HomeComponent implements OnInit {
 
   }
 
+  getUniqueRandomWords(numberOfWords: number): string[] {
+
+    // Shuffle the words array using Fisher-Yates shuffle
+    const shuffled = [...this.randomWords];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      console.log("hehe");
+
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // Return first 5 unique words
+    return shuffled.slice(0, numberOfWords);
+  }
 
 }
 
