@@ -1,7 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { NgWhiteboardComponent, WhiteboardElement, WhiteboardOptions } from 'ng-whiteboard';
-
 import { NgWhiteboardService } from 'ng-whiteboard';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -70,8 +68,7 @@ export class HomeComponent implements OnInit {
   round: number = 1;
   totalRound: number = 0;
   guessWordLength: number = 0
-  guessedUsers: Set<string> = new Set();
-
+  guessedUsers: Set<string> = new Set(); 
    playerGuessedAudio :any= new Audio("https://skribbl.io/audio/playerGuessed.ogg");
    tickAudio :any= new Audio("https://skribbl.io/audio/tick.ogg");
    roundStartAudio :any= new Audio("https://skribbl.io/audio/roundStart.ogg");
@@ -210,7 +207,8 @@ export class HomeComponent implements OnInit {
       const drawerObj = this.activeUsersChanges.find((u: any) => u.user === guesser);
       if (drawerObj) {
         drawerObj.points += 1;
-        this.groupPoints = [...this.activeUsersChanges];
+        
+        this.groupPoints = [...this.activeUsersChanges ,];
         this.serviceSrv.broadcastPoints(this.groupId, this.groupPoints);
       }
       // Check if all users except the drawer have guessed
@@ -219,6 +217,8 @@ export class HomeComponent implements OnInit {
       
       const allGuessed = usersToGuess.every(user => this.guessedUsers.has(user));
       console.log(allGuessed);
+      console.log(this.guessedUsers);
+      
 
       if (allGuessed) {
         // Clear the guessed users set for the next round
@@ -385,9 +385,7 @@ export class HomeComponent implements OnInit {
 
   }
 
-  showWinnerModal() {
-     
-
+  showWinnerModal() {  // 👀 Show winner modal
     this.winner = this.groupPoints.sort((a:any,b:any)=> b.points - a.points);
     this.winner = this.winner.slice(0,3);
     this.winnerModalVisible = true;

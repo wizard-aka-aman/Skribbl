@@ -42,7 +42,7 @@ export class ServiceService {
       this.GetUsersInGroup(groupId).then(onUserListUpdate);
     }); 
     this.hubConnection.on("ReceiveDrawer", (drawer: string) => {
-     console.log(`${drawer} is now drawing!`, "Drawing Turn");
+    //  console.log(`${drawer} is now drawing!`, "Drawing Turn");
     });
 
     try {
