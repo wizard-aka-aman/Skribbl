@@ -13,7 +13,9 @@ export class ServiceService {
   // baseUrl = 'https://hepefek442.bsite.net'; // Global  server as needed
   pen: any
   users: any;
-  
+  joinAudio :any= new Audio("https://skribbl.io/audio/join.ogg");
+   leaveAudio :any= new Audio("https://skribbl.io/audio/leave.ogg");
+
 
   constructor(private http: HttpClient) { }
   public async startConnection(groupId: string, user: string,
@@ -30,10 +32,12 @@ export class ServiceService {
     this.hubConnection.on("ReceiveChat", onChatReceive);
     this.hubConnection.on("UserJoined", (userName: string, groupId: string) => {
       console.log(`${userName} joined group ${groupId}`);
+      this.joinAudio.play();
       this.GetUsersInGroup(groupId).then(onUserListUpdate);
     });
     this.hubConnection.on("UserLeft", (groupId: string, username: string) => {
       console.log(`${username} left group ${groupId}`);
+      this.leaveAudio.play();
       // Optionally remove from UI list of active users
       this.GetUsersInGroup(groupId).then(onUserListUpdate);
     }); 
@@ -47,6 +51,7 @@ export class ServiceService {
       // await this.hubConnection.invoke("JoinGroup", groupId);
       await this.hubConnection.invoke("JoinGroup", groupId, user);
       this.GetUsersInGroup(groupId).then(onUserListUpdate);
+      
     } catch (err) {
       console.error("SignalR Connection Error:", err);
     }

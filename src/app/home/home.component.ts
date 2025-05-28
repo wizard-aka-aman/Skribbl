@@ -72,6 +72,11 @@ export class HomeComponent implements OnInit {
   guessWordLength: number = 0
   guessedUsers: Set<string> = new Set();
 
+   playerGuessedAudio :any= new Audio("https://skribbl.io/audio/playerGuessed.ogg");
+   tickAudio :any= new Audio("https://skribbl.io/audio/tick.ogg");
+   roundStartAudio :any= new Audio("https://skribbl.io/audio/roundStart.ogg");
+   roundEndSuccessAudio :any= new Audio("https://skribbl.io/audio/roundEndSuccess.ogg");
+   
 
 
 
@@ -159,6 +164,9 @@ export class HomeComponent implements OnInit {
     });
     this.serviceSrv.hubConnection.on("ReceiveTimer", (timeLeft: number) => {
       this.groupTimer = timeLeft;
+      if(timeLeft < 10){
+        this.tickAudio.play();
+      }
     });
 
     this.serviceSrv.hubConnection.on("ReceivePoints", (points: any) => {
@@ -167,16 +175,22 @@ export class HomeComponent implements OnInit {
     this.serviceSrv.hubConnection.on("ReceiveRoundEnded", (round: string) => {
       this.round++;
       this.toastr.info(`${round} has ended!`, "Round Update");
+      this.roundEndSuccessAudio.play();
     });
 
     this.serviceSrv.hubConnection.on("ReceiveGameStarted", () => {
       this.isStarted = true; // Hide the Start button
       this.toastr.info("Game has been started!", "Started");
+      this.roundStartAudio.play();
     });
     this.serviceSrv.hubConnection.on("ReceiveGameEnded", (winner: any) => {
-      this.winnerModalVisible = true // Hide the Start button
-      this.winner = winner
+      this.winnerModalVisible = true; // Hide the Start button
+      this.winner = winner;
+      this.isStarted = false;
+      this.serviceSrv.setCurrentDrawer(this.groupId, "");
+      this.whoDraw = "";
       this.toastr.info("Game has been Ended!", "Started");
+      
     });
     this.serviceSrv.hubConnection.on("ReceiveSelectedWord", (word: string) => {
       this.guessWordLength = word.length;
@@ -185,6 +199,7 @@ export class HomeComponent implements OnInit {
 
 
     this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: string, word: string) => {
+  this.playerGuessedAudio.play();
       this.toastr.success(`${guesser} guessed the word!`, "Correct Guess");
       if (this.user == guesser) {
         this.isUserGuess = true;
@@ -284,7 +299,7 @@ export class HomeComponent implements OnInit {
       return;
     }
     this.serviceSrv.broadcastGameStarted(this.groupId); // 👈 Call this
-    this.isStarted = true;
+    
 
     if (Object.keys(this.activeUsersChanges).length === 0) {
       this.activeUsersChanges = this.activeUsers.map((e: any) => ({
@@ -301,9 +316,10 @@ export class HomeComponent implements OnInit {
     }
 
     console.log(this.activeUsersChanges);
-    this.groupPoints = this.activeUsersChanges
+    this.groupPoints = this.activeUsersChanges;
+    this.isStarted = true;
     this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
-
+    
     this.nextDrawer();
 
   }
@@ -321,11 +337,11 @@ export class HomeComponent implements OnInit {
         return;
 
       }
-      this.toastr.info("All users have drawn once!", "Info");
+      // this.toastr.info("All users have drawn once!", "Info");
       this.isStarted = false
       this.showWinnerModal();
       console.log(this.groupPoints);
-
+      
       return;
     }
     currentUser.isDrawing = true;
@@ -340,6 +356,7 @@ export class HomeComponent implements OnInit {
       this.timer--;
       this.serviceSrv.broadcastTimer(this.groupId, this.timer); // 🔁 real-time update
       console.log(this.timer);
+      
       if (this.timer == 0) {
         clearInterval(this.counting);
         this.timer = this.group.timer;
@@ -369,11 +386,15 @@ export class HomeComponent implements OnInit {
   }
 
   showWinnerModal() {
-    const maxPointsUser = this.groupPoints.reduce((max: any, user: any) =>
-      user.points > max.points ? user : max, this.groupPoints[0]);
+     
 
-    this.winner = maxPointsUser;
+    this.winner = this.groupPoints.sort((a:any,b:any)=> b.points - a.points);
+    this.winner = this.winner.slice(0,3);
     this.winnerModalVisible = true;
+    console.log(this.winner);
+    console.log(this.groupPoints);
+    
+    
     this.serviceSrv.broadcastGameEnded(this.groupId, this.winner);
   }
 

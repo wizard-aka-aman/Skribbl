@@ -1,113 +1,216 @@
-<div class="container-fluid   overflow-hidden">
-  <div class="row  ">
-
-
+<div class="container-fluid overflow-hidden">
+  <div class="row">
     <!-- Left Panel: Active Users -->
     <div class="col-md-2 col-sm-12 bg-light border-end d-flex flex-column p-3">
-      <div class="text-center fs-2 "> Timer : {{groupTimer}} </div>
+      <div class="text-center fs-2">
+        <img
+          src="https://skribbl.io/img/clock.gif"
+          alt=""
+          srcset=""
+          style="width: 35px; height: 35px"
+        />
+        {{ groupTimer }}
+      </div>
+
       <h5 class="text-center mb-3">Active Users</h5>
       <div class="flex-grow-1 overflow-auto">
         <div *ngFor="let item of activeUsers" class="mb-2">
-          <span class="badge bg-primary" *ngIf="item === user"><b>{{ item }} (You)</b></span>
-          <span class="badge bg-secondary" *ngIf="item !== user">{{ item }}</span>
-        </div>  
+          <span class="badge bg-primary" *ngIf="item === user">
+            <img
+              src="https://skribbl.io/img/setting_1.gif"
+              style="width: 28px; height: 28px"
+            />
+            {{ item }}
+            <img
+              *ngIf="CreatedBy === item"
+              src="https://skribbl.io/img/owner.gif"
+              style="width: 28px; height: 28px"
+            />
+            <img
+              *ngIf="whoDraw === item"
+              src="https://skribbl.io/img/pen.gif"
+              style="width: 28px; height: 28px"
+            />
+          </span>
+          <span class="badge bg-secondary" *ngIf="item !== user">
+            <img
+              src="https://skribbl.io/img/setting_1.gif"
+              style="width: 28px; height: 28px"
+            />{{ item }}
+            <img
+              *ngIf="CreatedBy === item"
+              src="https://skribbl.io/img/owner.gif"
+              style="width: 28px; height: 28px"
+            />
+            <img
+              *ngIf="whoDraw === item"
+              src="https://skribbl.io/img/pen.gif"
+              style="width: 28px; height: 28px"
+            />
+          </span>
+        </div>
       </div>
-      
-      <div class="points-board">
-  <h3>Points:</h3>
-  <ul>
-    <li *ngFor="let user of groupPoints">
-      {{ user.user }}: {{ user.points }} points
-    </li>
-  </ul>
-</div>
 
+      <div class="points-board">
+        <h3>Points:</h3>
+        <ul>
+          <li *ngFor="let user of groupPoints">
+            {{ user.user }}: {{ user.points }} points
+          </li>
+        </ul>
+      </div>
     </div>
 
     <!-- Center Panel: Canvas -->
     <div class="col-md-7 canvas-wrapper col-sm-12 d-flex flex-column p-3">
-      <div class="fs-3 text-center">Round {{round}} of {{totalRound}}</div>
-      
-      <div  class="flex-grow-1  border rounded shadow-sm mb-3">
-       <div class="text-center"  *ngIf="!isStarted && user==CreatedBy"> Start a game with  {{activeUsers.length}} users : <button class="btn btn-outline-secondary w-10 " (click)="start()">Start</button></div>
-        
-       <div   *ngIf="isStarted" class="text-center fs-3 "> {{userSelectedWord}}</div>
-       <div   *ngIf="whoDraw != user && isStarted" class="text-center fs-3 "> 
+      <div class="fs-3 text-center">Round {{ round }} of {{ totalRound }}</div>
+
+      <div class="text-center" *ngIf="!isStarted && user == CreatedBy">
+        Start a game with {{ activeUsers.length }} users :
+        <button class="btn btn-outline-secondary w-10" (click)="start()">
+          Start
+        </button>
+      </div>
+      <div class="flex-grow-1 border rounded shadow-sm mb-3">
+        <div *ngIf="isStarted" class="text-center fs-3">
+          {{ userSelectedWord }}
+        </div>
+        <div *ngIf="whoDraw != user && isStarted" class="text-center fs-3">
           <span *ngFor="let _ of [].constructor(guessWordLength)">_ </span>
-          {{guessWordLength}}
-       </div>
-        <ng-whiteboard  
-        
-        (mouseup)="send()"
-        (touchend)="send()"
-          style="height: 95%; width: 100%;"
-          class="whiteboard-box"  
+          {{ guessWordLength }}
+        </div>
+        <ng-whiteboard
+          (mouseup)="send()"
+          (touchend)="send()"
+          style="height: 96%; width: 100%"
+          class="whiteboard-box"
           [center]="true"
-          (dataChange)="onDataChange($event)" 
-          [drawingEnabled]="whoDraw == user?true:false "
-          [options]="whiteboardOptions"> 
+          (dataChange)="onDataChange($event)"
+          [drawingEnabled]="whoDraw == user ? true : false"
+          [options]="whiteboardOptions"
+        >
         </ng-whiteboard>
       </div>
 
       <!-- Controls Below Canvas -->
-      <div class="d-flex justify-content-between  ">
-        <button class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0" [disabled]="whoDraw != user" (click)="Undo() ">Undo</button>
-        <button class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0" [disabled]="whoDraw != user" (click)="clearBoard()">Clear</button>
-        <button class="btn btn-primary w-100 w-sm-auto" [disabled]="whoDraw != user" (click)="send()">Send Canvas</button>
+      <div class="d-flex justify-content-between">
+        <button
+          class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0"
+          [disabled]="whoDraw != user"
+          (click)="Undo()"
+        >
+          Undo
+          <img
+            src="https://skribbl.io/img/undo.gif"
+            style="width: 35px; height: 35px"
+          />
+        </button>
+        <button
+          class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0"
+          [disabled]="whoDraw != user"
+          (click)="clearBoard()"
+        >
+          Clear
+          <img
+            src="https://skribbl.io/img/clear.gif"
+            style="width: 35px; height: 35px"
+          />
+        </button>
+        <!-- <button
+          class="btn btn-primary w-100 w-sm-auto"
+          [disabled]="whoDraw != user"
+          (click)="send()"
+        >
+          Send Canvas
+        </button> -->
       </div>
     </div>
- <!-- Right Panel: Chat -->
-<div class="col-md-3 col-sm-12 d-flex flex-column bg-white border-start p-3 chat-container">
-  
-  <!-- Chat Header -->
-  <div class="text-center bg-primary text-white rounded py-2 mb-3 shadow-sm">
-    <strong>{{ naam }}</strong>
-  </div>
+    <!-- Right Panel: Chat -->
+    <div
+      class="col-md-3 col-sm-12 d-flex flex-column bg-white border-start p-3 chat-container"
+    >
+      <!-- Chat Header -->
+      <div
+        class="text-center bg-primary text-white rounded py-2 mb-3 shadow-sm"
+      >
+        <strong>{{ naam }}</strong>
+      </div>
 
-  <!-- Chat Messages: Scrollable -->
-  <div #chatContainer 
-       class="flex-grow-1 overflow-auto mb-3" 
-       style="min-height: 0;">
-    <div *ngFor="let msg of chats" 
-         class="d-flex mb-2" 
-         [ngClass]="msg.sender === user ? 'justify-content-end' : 'justify-content-start'">
-      <div class="p-2 rounded shadow-sm message-bubble"
-           [ngClass]="msg.sender === user ? 'bg-primary text-white' : 'bg-secondary text-white'"
-           style="max-width: 75%;">
-        <div class="fw-bold small">{{ msg.sender }}</div>
-        <div>{{ msg.message }}</div>
-        <div class="text-end small text-light">
-          {{ msg.sentAt | date : 'MMM d, y, h:mm a' }}
+      <!-- Chat Messages: Scrollable -->
+      <div
+        #chatContainer
+        class="flex-grow-1 overflow-auto mb-3"
+        style="min-height: 0"
+      >
+        <div
+          *ngFor="let msg of chats"
+          class="d-flex mb-2"
+          [ngClass]="
+            msg.sender === user
+              ? 'justify-content-end'
+              : 'justify-content-start'
+          "
+        >
+          <div
+            class="p-2 rounded shadow-sm message-bubble"
+            [ngClass]="
+              msg.sender === user
+                ? 'bg-primary text-white'
+                : 'bg-secondary text-white'
+            "
+            style="max-width: 75%"
+          >
+            <div class="fw-bold small">{{ msg.sender }}</div>
+            <div>{{ msg.message }}</div>
+            <div class="text-end small text-light">
+              {{ msg.sentAt | date : "MMM d, y, h:mm a" }}
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- Chat Input (Fixed at Bottom) -->
+      <div class="d-flex chat-input">
+        <input
+          type="text"
+          class="form-control mb-2 mb-sm-0"
+          [disabled]="whoDraw == user || isUserGuess"
+          placeholder="Type a message..."
+          [(ngModel)]="message"
+          (keydown.enter)="sendchat()"
+        />
+        <button
+          class="btn btn-success ms-sm-2 w-100 w-sm-auto"
+          [disabled]="whoDraw == user || isUserGuess"
+          (click)="sendchat()"
+        >
+          Send
+        </button>
+      </div>
     </div>
-  </div>
-
-  <!-- Chat Input (Fixed at Bottom) -->
-  <div class="d-flex   chat-input">
-    <input type="text" class="form-control mb-2 mb-sm-0" [disabled]="whoDraw == user || isUserGuess"  placeholder="Type a message..." [(ngModel)]="message" (keydown.enter)="sendchat()" />
-    <button class="btn btn-success ms-sm-2 w-100 w-sm-auto" [disabled]="whoDraw == user || isUserGuess" (click)="sendchat()">Send</button>
-  </div>
-
-</div>
-
-
-
   </div>
 </div>
 
 <!-- Modal -->
-<div class="modal fade show d-block" *ngIf="showWordSelectionModal" id="staticBackdrop" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+<div
+  class="modal fade show d-block"
+  *ngIf="showWordSelectionModal"
+  id="staticBackdrop"
+  tabindex="-1"
+  style="background: rgba(0, 0, 0, 0.5)"
+>
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5">Choose a Word to Draw</h1> 
+        <h1 class="modal-title fs-5">Choose a Word to Draw</h1>
       </div>
       <div class="modal-body">
         <div class="d-flex flex-column gap-2">
-          <button *ngFor="let item of selectedRandomWords"
-                  class="btn btn-outline-primary"
-                  (click)="selectedRandomWord(item)">
+          <button
+            *ngFor="let item of selectedRandomWords"
+            class="btn btn-outline-primary"
+            (click)="selectedRandomWord(item)"
+          >
             {{ item }}
           </button>
         </div>
@@ -117,7 +220,12 @@
 </div>
 
 <!-- Winner Modal -->
-<div class="modal fade show d-block" *ngIf="winnerModalVisible" tabindex="-1" style="background: rgba(0,0,0,0.6); z-index: 1055;">
+<div
+  class="modal fade show d-block"
+  *ngIf="winnerModalVisible"
+  tabindex="-1"
+  style="background: rgba(0, 0, 0, 0.6); z-index: 1055"
+>
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content text-center">
       <div class="modal-header bg-success text-white">
@@ -126,12 +234,13 @@
       <div class="modal-body">
         <p class="fs-5 mb-1">🏆 Winner:</p>
         <h4 class="fw-bold text-primary">{{ winner?.user }}</h4>
-        <p class="text-muted">with <strong>{{ winner?.points }}</strong> points!</p>
+        <p class="text-muted">
+          with <strong>{{ winner?.points }}</strong> points!
+        </p>
       </div>
       <div class="modal-footer justify-content-center">
-        <button class="btn btn-primary" (click)="restartGame()">Play Again</button>
+        <button class="btn btn-primary" (click)="restartGame()">Close</button>
       </div>
     </div>
   </div>
 </div>
-
