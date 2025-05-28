@@ -69,9 +69,7 @@
           *ngFor="let item of groupPoints"
           class="card mb-2 shadow-sm border-0"
           [ngClass]="{
-            'bg-light': item.user !== user ,
-            'bg-info bg-opacity-25': item.user === user,
-            'bg-success' : isUserGuess ,
+            'bg-success' : guessedUsers.has(item.user) ,
           }"
         >
           <div
@@ -143,7 +141,7 @@
         <ng-whiteboard
           (mouseup)="send()"
           (touchend)="send()"
-          style="height: 96%; width: 100%"
+           
           class="whiteboard-box"
           [center]="true"
           (dataChange)="onDataChange($event)"

@@ -51,7 +51,7 @@
 }
 
 .whiteboard-box {
-  width: 100%;
+  width: 50rem;
   height: 100% ;
   display: block;
   box-sizing: border-box;

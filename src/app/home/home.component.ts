@@ -68,12 +68,12 @@ export class HomeComponent implements OnInit {
   round: number = 1;
   totalRound: number = 0;
   guessWordLength: number = 0
-  guessedUsers: Set<string> = new Set(); 
-   playerGuessedAudio :any= new Audio("https://skribbl.io/audio/playerGuessed.ogg");
-   tickAudio :any= new Audio("https://skribbl.io/audio/tick.ogg");
-   roundStartAudio :any= new Audio("https://skribbl.io/audio/roundStart.ogg");
-   roundEndSuccessAudio :any= new Audio("https://skribbl.io/audio/roundEndSuccess.ogg");
-   
+  guessedUsers: Set<string> = new Set();
+  playerGuessedAudio: any = new Audio("https://skribbl.io/audio/playerGuessed.ogg");
+  tickAudio: any = new Audio("https://skribbl.io/audio/tick.ogg");
+  roundStartAudio: any = new Audio("https://skribbl.io/audio/roundStart.ogg");
+  roundEndSuccessAudio: any = new Audio("https://skribbl.io/audio/roundEndSuccess.ogg");
+
 
 
 
@@ -115,13 +115,20 @@ export class HomeComponent implements OnInit {
         this.whiteboard.data = [...currentUserent, ...data];
       },
       (user: string, message: string, sentAt: string) => {
-        this.chats.push({ sender: user, message, sentAt });
+        
+        this.chats.push({
+          sender: user,
+          message: message,
+          time: sentAt,
+          type: 'chat'
+        });
+        // this.chats.push({ sender: user, message, sentAt });
         console.log(this.chats);
 
         setTimeout(() => {
           const el = this.chatContainer.nativeElement;
           el.scrollTop = el.scrollHeight;
-        }, 10);
+        }, 250);
       },
       (users: string[]) => {
         this.activeUsers = users;
@@ -148,6 +155,7 @@ export class HomeComponent implements OnInit {
       this.clearBoard();
       this.userSelectedWord = ""
       this.isUserGuess = false
+      this.guessedUsers.clear();
       this.selectedRandomWords = this.getUniqueRandomWords(this.group.wordCount);
       console.log(this.selectedRandomWords);
 
@@ -161,7 +169,7 @@ export class HomeComponent implements OnInit {
     });
     this.serviceSrv.hubConnection.on("ReceiveTimer", (timeLeft: number) => {
       this.groupTimer = timeLeft;
-      if(timeLeft < 10){
+      if (timeLeft < 10) {
         this.tickAudio.play();
       }
     });
@@ -187,7 +195,7 @@ export class HomeComponent implements OnInit {
       this.serviceSrv.setCurrentDrawer(this.groupId, "");
       this.whoDraw = "";
       this.toastr.info("Game has been Ended!", "Started");
-      
+
     });
     this.serviceSrv.hubConnection.on("ReceiveSelectedWord", (word: string) => {
       this.guessWordLength = word.length;
@@ -196,8 +204,17 @@ export class HomeComponent implements OnInit {
 
 
     this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: string, word: string) => {
-  this.playerGuessedAudio.play();
-      this.toastr.success(`${guesser} guessed the word!`, "Correct Guess");
+      this.playerGuessedAudio.play();
+ 
+        this.chats.push({
+          sender: 'System',
+          message: `🎉 ${guesser} guessed the word!`,  
+        });
+        
+    setTimeout(() => {
+      const el = this.chatContainer.nativeElement;
+      el.scrollTop = el.scrollHeight;
+    }, 250); 
       if (this.user == guesser) {
         this.isUserGuess = true;
       }
@@ -207,18 +224,18 @@ export class HomeComponent implements OnInit {
       const drawerObj = this.activeUsersChanges.find((u: any) => u.user === guesser);
       if (drawerObj) {
         drawerObj.points += 1;
-        
-        this.groupPoints = [...this.activeUsersChanges ,];
+
+        this.groupPoints = [...this.activeUsersChanges,];
         this.serviceSrv.broadcastPoints(this.groupId, this.groupPoints);
       }
       // Check if all users except the drawer have guessed
       const usersToGuess = this.activeUsers.filter(u => u !== drawer);
       console.log(usersToGuess);
-      
+
       const allGuessed = usersToGuess.every(user => this.guessedUsers.has(user));
       console.log(allGuessed);
       console.log(this.guessedUsers);
-      
+
 
       if (allGuessed) {
         // Clear the guessed users set for the next round
@@ -282,7 +299,7 @@ export class HomeComponent implements OnInit {
     setTimeout(() => {
       const el = this.chatContainer.nativeElement;
       el.scrollTop = el.scrollHeight;
-    }, 50);
+    }, 250);
   }
   start() {
 
@@ -299,7 +316,7 @@ export class HomeComponent implements OnInit {
       return;
     }
     this.serviceSrv.broadcastGameStarted(this.groupId); // 👈 Call this
-    
+
 
     if (Object.keys(this.activeUsersChanges).length === 0) {
       this.activeUsersChanges = this.activeUsers.map((e: any) => ({
@@ -319,7 +336,7 @@ export class HomeComponent implements OnInit {
     this.groupPoints = this.activeUsersChanges;
     this.isStarted = true;
     this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
-    
+
     this.nextDrawer();
 
   }
@@ -341,7 +358,7 @@ export class HomeComponent implements OnInit {
       this.isStarted = false
       this.showWinnerModal();
       console.log(this.groupPoints);
-      
+
       return;
     }
     currentUser.isDrawing = true;
@@ -356,7 +373,7 @@ export class HomeComponent implements OnInit {
       this.timer--;
       this.serviceSrv.broadcastTimer(this.groupId, this.timer); // 🔁 real-time update
       console.log(this.timer);
-      
+
       if (this.timer == 0) {
         clearInterval(this.counting);
         this.timer = this.group.timer;
@@ -386,13 +403,13 @@ export class HomeComponent implements OnInit {
   }
 
   showWinnerModal() {  // 👀 Show winner modal
-    this.winner = this.groupPoints.sort((a:any,b:any)=> b.points - a.points);
-    this.winner = this.winner.slice(0,3);
+    this.winner = this.groupPoints.sort((a: any, b: any) => b.points - a.points);
+    this.winner = this.winner.slice(0, 3);
     this.winnerModalVisible = true;
     console.log(this.winner);
     console.log(this.groupPoints);
-    
-    
+
+
     this.serviceSrv.broadcastGameEnded(this.groupId, this.winner);
   }
 

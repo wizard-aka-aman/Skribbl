@@ -61,7 +61,7 @@ export class ServiceService {
     if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
       this.hubConnection.invoke("SendMessage", groupId, user, message, sentAt);
     }
-    this.saveMessage({ groupName: groupId, sender: user, message })
+    // this.saveMessage({ groupName: groupId, sender: user, message })
   }
 
   public SendCanvas(groupId: string, penmodel: any) {
