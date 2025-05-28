@@ -35,7 +35,7 @@
     }
     .chat-input{
       position: absolute;
-      top: 85vh;
+      top: 10vh;
       right: 20%;
       background-color: #218838;
     }
