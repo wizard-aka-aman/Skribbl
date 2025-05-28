@@ -133,6 +133,11 @@ broadcastRoundEnded(groupId: string , round: string) {
   this.hubConnection.invoke("BroadcastRoundEnded", groupId , round)
     .catch(err => console.error("Error broadcasting Round Ended:", err));
 }
+broadcastRoomChanges(groupId: string, timer: number, rounds: number, wordCount: number) {
+  this.hubConnection.invoke("BroadcastRoomChanges", groupId, timer, rounds, wordCount)
+    .catch(err => console.error("Error broadcasting Room Changes:", err));
+}
+
 
 storeSelectedWord(groupId: string, word: string) {
   this.hubConnection.invoke("StoreSelectedWord", groupId, word);
@@ -149,5 +154,9 @@ public postCreateGroup(form : any){
 }
 public getGroup(name:string){
   return this.http.get(`${this.baseUrl}/api/Game/GetRoom/`+name);
+}
+
+public postChangeSetting(form : any , groupId :string){
+  return this.http.put(`${this.baseUrl}/api/Game/Update/`+groupId , form);
 }
 }

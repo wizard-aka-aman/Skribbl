@@ -41,8 +41,12 @@
                 >
                   {{ item }}
                 </strong>
-                <div *ngIf="CreatedBy != item" class="small text-muted">Waiting to start...</div>
-                <div *ngIf="CreatedBy == item" class="small text-muted"><b>Owner</b></div>
+                <div *ngIf="CreatedBy != item" class="small text-muted">
+                  Waiting for start...
+                </div>
+                <div *ngIf="CreatedBy == item" class="small text-muted">
+                  <b>Owner</b>
+                </div>
               </div>
             </div>
 
@@ -112,8 +116,6 @@
           </div>
         </div>
       </div>
-
-      
     </div>
 
     <!-- Center Panel: Canvas -->
@@ -125,10 +127,13 @@
         <button class="btn btn-outline-secondary w-10" (click)="start()">
           Play
         </button>
-        <button class="btn   " (click)="start()">
-          <img src="https://skribbl.io/img/settings.gif" title="Setting" style="width: 25px; height: 25px">
+        <button class="btn" data-bs-toggle="modal" data-bs-target="#infoModal">
+          <img
+            src="https://skribbl.io/img/settings.gif"
+            title="Setting"
+            style="width: 25px; height: 25px"
+          />
         </button>
-
       </div>
       <div class="flex-grow-1 border rounded shadow-sm mb-3">
         <div *ngIf="isStarted" class="text-center fs-3">
@@ -334,6 +339,45 @@
         >
           Close
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Button to open modal -->
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="infoModal"
+  tabindex="-1"
+  aria-labelledby="infoModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="infoModalLabel">Change Setting</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <input style="display: none" type="text" [(ngModel)]="groupId" />
+        <input style="display: none" type="text" [(ngModel)]="CreatedBy" />
+        Rounds : <input type="text" [(ngModel)]="postrounds" /> <br />
+        Timer : <input type="text" [(ngModel)]="posttimer" /> <br />
+        WordCount : <input type="text" [(ngModel)]="postwordCount" /> <br />
+        <div
+          class="btn btn-primary"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="postChangeSetting()"
+        >
+          Update Room
+        </div>
       </div>
     </div>
   </div>

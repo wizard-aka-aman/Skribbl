@@ -33,6 +33,12 @@
     .message-bubble {
       max-width: 90%;
     }
+    .chat-input{
+      position: absolute;
+      top: 85vh;
+      right: 20%;
+      background-color: #218838;
+    }
   }
   .canvas-wrapper {
   height: 700px; /* Default height */

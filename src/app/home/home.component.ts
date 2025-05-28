@@ -73,7 +73,12 @@ export class HomeComponent implements OnInit {
   tickAudio: any = new Audio("https://skribbl.io/audio/tick.ogg");
   roundStartAudio: any = new Audio("https://skribbl.io/audio/roundStart.ogg");
   roundEndSuccessAudio: any = new Audio("https://skribbl.io/audio/roundEndSuccess.ogg");
+  wordCount: number = 0;
 
+  postRoomBody: any = {};
+  posttimer: number = 0;
+  postrounds: number = 0;
+  postwordCount: number = 0;
 
 
 
@@ -98,9 +103,12 @@ export class HomeComponent implements OnInit {
       console.log(this.CreatedBy);
 
       this.groupTimer = this.group.timer;
-      this.totalRound = this.group.rounds
+      this.totalRound = this.group.rounds;
+      this.wordCount = this.group.wordCount
       console.log(this.totalRound);
-
+      this.posttimer = this.groupTimer;
+      this.postrounds = this.totalRound;
+      this.postwordCount = this.wordCount;
     })
 
   }
@@ -115,7 +123,7 @@ export class HomeComponent implements OnInit {
         this.whiteboard.data = [...currentUserent, ...data];
       },
       (user: string, message: string, sentAt: string) => {
-        
+
         this.chats.push({
           sender: user,
           message: message,
@@ -156,7 +164,7 @@ export class HomeComponent implements OnInit {
       this.userSelectedWord = ""
       this.isUserGuess = false
       this.guessedUsers.clear();
-      this.selectedRandomWords = this.getUniqueRandomWords(this.group.wordCount);
+      this.selectedRandomWords = this.getUniqueRandomWords(this.wordCount);
       console.log(this.selectedRandomWords);
 
       if (this.user == drawer) {
@@ -188,6 +196,15 @@ export class HomeComponent implements OnInit {
       this.toastr.info("Game has been started!", "Started");
       this.roundStartAudio.play();
     });
+
+    this.serviceSrv.hubConnection.on("ReceiveRoomChanges", (timer: number, rounds: number, wordCount: number) => {
+      this.groupTimer = timer;
+      this.totalRound = rounds;
+      this.wordCount = wordCount;
+      this.toastr.info("Room settings updated!", "Settings Changed");
+    });
+
+
     this.serviceSrv.hubConnection.on("ReceiveGameEnded", (winner: any) => {
       this.winnerModalVisible = true; // Hide the Start button
       this.winner = winner;
@@ -203,18 +220,19 @@ export class HomeComponent implements OnInit {
     });
 
 
+
     this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: string, word: string) => {
       this.playerGuessedAudio.play();
- 
-        this.chats.push({
-          sender: 'System',
-          message: `🎉 ${guesser} guessed the word!`,  
-        });
-        
-    setTimeout(() => {
-      const el = this.chatContainer.nativeElement;
-      el.scrollTop = el.scrollHeight;
-    }, 250); 
+
+      this.chats.push({
+        sender: 'System',
+        message: `🎉 ${guesser} guessed the word!`,
+      });
+
+      setTimeout(() => {
+        const el = this.chatContainer.nativeElement;
+        el.scrollTop = el.scrollHeight;
+      }, 250);
       if (this.user == guesser) {
         this.isUserGuess = true;
       }
@@ -244,7 +262,7 @@ export class HomeComponent implements OnInit {
         // Stop current timer interval (if running)
         if (this.counting) {
           clearInterval(this.counting);
-          this.timer = this.group.timer;
+          this.timer = this.posttimer;
           this.serviceSrv.broadcastTimer(this.groupId, this.timer);
         }
 
@@ -310,7 +328,7 @@ export class HomeComponent implements OnInit {
     this.clearBoard();
     this.round = 1;
     this.userSelectedWord = ""
-    this.selectedRandomWords = this.getUniqueRandomWords(this.group.wordCount);
+    this.selectedRandomWords = this.getUniqueRandomWords(this.wordCount);
     if (this.activeUsers.length < 2) {
       this.toastr.warning("Cannot start a room with less than 2 Users !", "Warning")
       return;
@@ -368,7 +386,7 @@ export class HomeComponent implements OnInit {
     this.whoDraw = currentUser.user;
     // 📡 Optional: Send this info to all group members via SignalR
     this.serviceSrv.broadcastDrawer(this.groupId, currentUser.user);
-    this.timer = this.group.timer
+    this.timer = this.posttimer
     this.counting = setInterval(() => {
       this.timer--;
       this.serviceSrv.broadcastTimer(this.groupId, this.timer); // 🔁 real-time update
@@ -376,7 +394,7 @@ export class HomeComponent implements OnInit {
 
       if (this.timer == 0) {
         clearInterval(this.counting);
-        this.timer = this.group.timer;
+        this.timer = this.posttimer;
         this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
         console.log(this.groupPoints);
         //  this.selectedRandomWords = []  
@@ -433,5 +451,34 @@ export class HomeComponent implements OnInit {
     return shuffled.slice(0, numberOfWords);
   }
 
+
+  postChangeSetting() {
+    this.postRoomBody.timer = this.posttimer;
+    this.postRoomBody.rounds = this.postrounds;
+    this.postRoomBody.WordCount = this.postwordCount;
+    this.postRoomBody.RoomName = this.groupId;
+    this.postRoomBody.CreatedBy = this.user;
+    console.log(this.postRoomBody);
+    this.serviceSrv.postChangeSetting(this.postRoomBody, this.groupId).subscribe({
+      next: (res: any) => {
+        // Broadcast the new settings to everyone
+        this.serviceSrv.broadcastRoomChanges(
+          this.groupId,
+          res[0].timer,
+          res[0].rounds,
+          res[0].wordCount
+        );
+
+        // Also update self
+        this.groupTimer = res[0].timer;
+        this.totalRound = res[0].rounds;
+        this.wordCount = res[0].wordCount;
+      },
+      error: (err: any) => {
+        this.toastr.error("Error Happened", "Error");
+        console.error(err);
+      }
+    });
+  }
 }
 
