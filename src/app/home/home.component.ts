@@ -4,7 +4,7 @@ import { NgWhiteboardService } from 'ng-whiteboard';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ServiceService } from '../service.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-home',
@@ -12,7 +12,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent {
 
   whiteboardOptions: WhiteboardOptions = {
     backgroundColor: 'rgb(224, 224, 224)',
@@ -74,23 +74,37 @@ export class HomeComponent implements OnInit {
   roundStartAudio: any = new Audio("https://skribbl.io/audio/roundStart.ogg");
   roundEndSuccessAudio: any = new Audio("https://skribbl.io/audio/roundEndSuccess.ogg");
   wordCount: number = 0;
-
   postRoomBody: any = {};
   posttimer: number = 0;
   postrounds: number = 0;
   postwordCount: number = 0;
+  token: string = "";
 
 
 
   @ViewChild('chatContainer') chatContainer!: ElementRef<HTMLDivElement>;
   @ViewChild(NgWhiteboardComponent) whiteboard!: NgWhiteboardComponent;
-  constructor(private router: ActivatedRoute, private toastr: ToastrService, private whiteboardService: NgWhiteboardService, private serviceSrv: ServiceService) {
+  constructor(private router: ActivatedRoute, private toastr: ToastrService, private whiteboardService: NgWhiteboardService, private serviceSrv: ServiceService, private route: Router) {
 
     this.router.queryParams.subscribe(param => {
       this.groupId = (param['groupId']);
-      this.user = (param['user']);
+      this.token = (param['token']);
       console.log(this.groupId);
+      console.log(this.token);
       this.naam = this.groupId
+    })
+    this.serviceSrv.GetUserFromToken(this.token).subscribe({
+      next: async (res: any) => {
+        console.log(res);
+        console.log(res.user);
+        this.user = res.user;
+        this.StartGame();
+      },
+      error: (err: any) => {
+        console.log(err);
+        this.toastr.error("token changed or invalid", "error");
+        this.route.navigate(['/']);
+      }
     })
     console.log(this.user);
     console.log(this.groupId);
@@ -110,8 +124,8 @@ export class HomeComponent implements OnInit {
       this.postrounds = this.totalRound;
       this.postwordCount = this.wordCount;
     })
-    document.addEventListener("keydown", ({ key }) => { 
-      let keys: string = key;  
+    document.addEventListener("keydown", ({ key }) => {
+      let keys: string = key;
       switch (keys) {
         case "u":
           if (!(this.whoDraw != this.user))
@@ -126,8 +140,8 @@ export class HomeComponent implements OnInit {
 
   }
 
-  async ngOnInit(): Promise<void> {
-    await this.serviceSrv.startConnection(
+  async StartGame() {
+   await this.serviceSrv.startConnection(
       this.groupId,
       this.user,
       (groupId, data) => {
@@ -176,8 +190,11 @@ export class HomeComponent implements OnInit {
 
     // 👇 ADD THIS: receive who is drawing
     this.serviceSrv.hubConnection.on("ReceiveDrawer", (drawer: string) => {
+
       this.selectedRandomWords = []
       this.clearBoard();
+      console.log(this.userSelectedWord);
+
       this.userSelectedWord = ""
       this.isUserGuess = false
       this.guessedUsers.clear();
@@ -234,6 +251,7 @@ export class HomeComponent implements OnInit {
     });
     this.serviceSrv.hubConnection.on("ReceiveSelectedWord", (word: string) => {
       this.guessWordLength = word.length;
+      this.userSelectedWord = word;
       // this.toastr.info("Word!", word);
     });
 
@@ -289,13 +307,21 @@ export class HomeComponent implements OnInit {
       }
 
     });
+    this.serviceSrv.hubConnection.on("UsernameExists", (message: string) => {
+      this.toastr.error(message);
+      this.route.navigate(['/']);
+    });
 
-
-    setTimeout(() => {
+    this.serviceSrv.hubConnection.on("ReceiveWordReveal", (word: string) => {
+      this.chats.push({
+        sender: 'System',
+        message: `⏰ Time's up! The word was: ${word}`,
+      });
+      setTimeout(() => {
       const el = this.chatContainer.nativeElement;
       el.scrollTop = el.scrollHeight;
     }, 250);
-
+    }); 
   }
 
 
@@ -413,6 +439,9 @@ export class HomeComponent implements OnInit {
       if (this.timer == 0) {
         clearInterval(this.counting);
         this.timer = this.posttimer;
+        console.log("in settimeout "+this.userSelectedWord);
+        
+        this.serviceSrv.broadcastSelectedWordToAll(this.groupId, this.userSelectedWord);
         this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
         console.log(this.groupPoints);
         //  this.selectedRandomWords = []  
@@ -471,8 +500,8 @@ export class HomeComponent implements OnInit {
 
 
   postChangeSetting() {
-    if(this.posttimer <=0|| this.postrounds <=0||this.postwordCount<=0){
-      this.toastr.error("Can't be negative or zero" ,"Error");
+    if (this.posttimer <= 0 || this.postrounds <= 0 || this.postwordCount <= 0) {
+      this.toastr.error("Can't be negative or zero", "Error");
       this.posttimer = this.groupTimer;
       this.postrounds = this.totalRound;
       this.postwordCount = this.wordCount;

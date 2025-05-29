@@ -87,14 +87,16 @@ export class ServiceService {
     this.hubConnection.invoke("BroadcastDrawer", groupId, drawer);
   }
 }
-  GetUsersInGroup(groupId: string): Promise<string[]> {
-    return this.hubConnection.invoke('GetUsersInGroup', groupId) .then((users: string[]) => {
-      return users;
-    })
-    .catch(err => {
-      console.error("Error fetching users:", err);
-      return [];
-    });;
+
+  public GetUsersInGroup(groupId: string): Promise<string[]> { 
+      return this.hubConnection.invoke('GetUsersInGroup', groupId) .then((users: string[]) => {
+        return users;
+      })
+      .catch(err => {
+        console.error("Error fetching users:", err);
+        return [];
+      });;
+    
   }
   
  
@@ -121,23 +123,26 @@ broadcastSelectedWord(groupId: string, word: string) {
     this.hubConnection.invoke("BroadcastSelectedWord", groupId, word);
   }
 }
-broadcastGameStarted(groupId: string) {
+public broadcastGameStarted(groupId: string) {
   this.hubConnection.invoke("BroadcastGameStarted", groupId)
     .catch(err => console.error("Error broadcasting game start:", err));
 }
-broadcastGameEnded(groupId: string , winner: any) {
+public broadcastGameEnded(groupId: string , winner: any) {
   this.hubConnection.invoke("BroadcastGameEnded", groupId , winner)
     .catch(err => console.error("Error broadcasting game start:", err));
 }
-broadcastRoundEnded(groupId: string , round: string) {
+public broadcastRoundEnded(groupId: string , round: string) {
   this.hubConnection.invoke("BroadcastRoundEnded", groupId , round)
     .catch(err => console.error("Error broadcasting Round Ended:", err));
 }
-broadcastRoomChanges(groupId: string, timer: number, rounds: number, wordCount: number) {
+public broadcastRoomChanges(groupId: string, timer: number, rounds: number, wordCount: number) {
   this.hubConnection.invoke("BroadcastRoomChanges", groupId, timer, rounds, wordCount)
     .catch(err => console.error("Error broadcasting Room Changes:", err));
 }
 
+public broadcastSelectedWordToAll(groupId: string, word: string) {
+  this.hubConnection.invoke("BroadcastWordReveal", groupId, word);
+}
 
 storeSelectedWord(groupId: string, word: string) {
   this.hubConnection.invoke("StoreSelectedWord", groupId, word);
@@ -159,4 +164,14 @@ public getGroup(name:string){
 public postChangeSetting(form : any , groupId :string){
   return this.http.put(`${this.baseUrl}/api/Game/Update/`+groupId , form);
 }
+
+public MapToken(token :any){
+  return this.http.post(`${this.baseUrl}/api/Game/map-token`,token);
+}
+
+
+public GetUserFromToken(token:string){
+  return this.http.get(`${this.baseUrl}/api/Game/get-user-from-token/`+token);
+}
+
 }

@@ -101,28 +101,44 @@
 
     <!-- Center Panel: Canvas -->
     <div class="col-12 col-md-7 order-1 order-md-2 d-flex flex-column p-3">
-      <div class="text-center fs-4 mb-2">
-        Round {{ round }} of {{ totalRound }}
-      </div>
+      <!-- Round Display -->
+<!-- Round Display -->
+<div class="text-center  ">
+  <h2 class="fw-bold text-gradient text-primary">Round {{ round }} of {{ totalRound }}</h2>
+</div>
 
-      <!-- Start Game Controls -->
-      <div class="text-center mb-2" *ngIf="!isStarted && user == CreatedBy">
-        Start with {{ activeUsers.length }} users:
-        <button class="btn btn-outline-secondary me-2" (click)="start()">
-          Play
-        </button>
-        <button
-          class="btn btn-outline-secondary"
-          data-bs-toggle="modal"
-          data-bs-target="#infoModal"
-        >
-          <img src="https://skribbl.io/img/settings.gif" style="width: 25px" />
-        </button>
-      </div>
+<!-- Game Controls -->
+<div
+  class="d-flex flex-column flex-md-row justify-content-center align-items-center   text-center"
+  *ngIf="!isStarted && user == CreatedBy"
+>
+  <div class="fs-4 text-muted   mb-md-0">
+    <span class="text-info fw-bold">Start with </span> 
+    <span class="text-success fw-bold">{{ activeUsers.length }} </span> 
+    <span class="text-info fw-bold">users:</span>
+  </div>
+  <div class="d-flex align-items-center mb-2 ">
+    <!-- Play Button -->
+    <button style="background-color: rgb(174, 176, 255); height: 35px;" class="btn  btn-gradient text-gradient  mx-2 shadow-lg border-0" (click)="start()">
+      <span class="fw-semibold">Play Now</span>
+    </button>
+    <!-- Settings Button -->
+    <button
+      class="btn btn-outline-light btn-lg d-flex align-items-center justify-content-center px-4 py-2 border-2 shadow-sm"
+      data-bs-toggle="modal"
+      data-bs-target="#infoModal"
+      title="Game Settings"
+    >
+      <img src="https://skribbl.io/img/settings.gif" alt="Settings" style="width: 28px; height: 28px;" />
+    </button>
+  </div>
+</div>
+
+
 
       <!-- Drawing Canvas -->
       <div class="flex-grow-1 mb-2 border rounded shadow-sm">
-        <div *ngIf="isStarted" class="text-center fs-4 py-2">
+        <div *ngIf="isStarted && whoDraw == user" class="text-center fs-4 py-2">
           {{ userSelectedWord }}
         </div>
         <div *ngIf="whoDraw != user && isStarted" class="text-center fs-4 py-2">
@@ -147,14 +163,14 @@
           [disabled]="whoDraw != user"
           (click)="Undo()"
         >
-          Undo <img src="https://skribbl.io/img/undo.gif" style="width: 20px" />
+          Undo (u) <img src="https://skribbl.io/img/undo.gif" style="width: 20px" />
         </button>
         <button
           class="btn btn-outline-secondary w-100 w-sm-auto"
           [disabled]="whoDraw != user"
           (click)="clearBoard()"
         >
-          Clear
+          Clear (c)
           <img src="https://skribbl.io/img/clear.gif" style="width: 20px" />
         </button>
       </div>
