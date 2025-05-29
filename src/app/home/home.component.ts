@@ -110,6 +110,19 @@ export class HomeComponent implements OnInit {
       this.postrounds = this.totalRound;
       this.postwordCount = this.wordCount;
     })
+    document.addEventListener("keydown", ({ key }) => { 
+      let keys: string = key;  
+      switch (keys) {
+        case "u":
+          if (!(this.whoDraw != this.user))
+            this.Undo();
+          break;
+        case "c":
+          if (!(this.whoDraw != this.user))
+            this.clearBoard();
+          break;
+      }
+    });
 
   }
 
@@ -127,7 +140,7 @@ export class HomeComponent implements OnInit {
         this.chats.push({
           sender: user,
           message: message,
-          time: sentAt,
+          sentAt: sentAt,
           type: 'chat'
         });
         // this.chats.push({ sender: user, message, sentAt });
@@ -155,6 +168,10 @@ export class HomeComponent implements OnInit {
 
     this.serviceSrv.getMessages(this.groupId).subscribe((msgs: any) => {
       this.chats = msgs;
+      setTimeout(() => {
+        const el = this.chatContainer.nativeElement;
+        el.scrollTop = el.scrollHeight;
+      }, 250);
     });
 
     // 👇 ADD THIS: receive who is drawing
@@ -211,6 +228,7 @@ export class HomeComponent implements OnInit {
       this.isStarted = false;
       this.serviceSrv.setCurrentDrawer(this.groupId, "");
       this.whoDraw = "";
+      this.isUserGuess = false
       this.toastr.info("Game has been Ended!", "Started");
 
     });
@@ -453,6 +471,13 @@ export class HomeComponent implements OnInit {
 
 
   postChangeSetting() {
+    if(this.posttimer <=0|| this.postrounds <=0||this.postwordCount<=0){
+      this.toastr.error("Can't be negative or zero" ,"Error");
+      this.posttimer = this.groupTimer;
+      this.postrounds = this.totalRound;
+      this.postwordCount = this.wordCount;
+      return;
+    }
     this.postRoomBody.timer = this.posttimer;
     this.postRoomBody.rounds = this.postrounds;
     this.postRoomBody.WordCount = this.postwordCount;

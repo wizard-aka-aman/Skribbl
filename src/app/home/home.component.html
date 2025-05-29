@@ -1,19 +1,19 @@
-<div class="container-fluid overflow-hidden">
-  <div class="row">
+<div class="container-fluid h-100 overflow-hidden">
+  <div class="row flex-column flex-md-row h-100">
     <!-- Left Panel: Active Users -->
-    <div class="col-md-2 col-sm-12 bg-light border-end d-flex flex-column p-3">
-      <div class="text-center fs-2">
-        <img
-          src="https://skribbl.io/img/clock.gif"
-          alt=""
-          srcset=""
-          style="width: 35px; height: 35px"
-        />
+    <div
+      class="col-12 col-md-2 order-3 order-md-1 bg-light border-end d-flex flex-column p-2 overflow-auto"
+      style="max-height: 100vh"
+    >
+      <div class="text-center fs-5 mb-2">
+        <img src="https://skribbl.io/img/clock.gif" style="width: 30px" />
         {{ groupTimer }}
       </div>
 
-      <h5 class="text-center mb-3">Active Users</h5>
-      <div *ngIf="!isStarted" class="flex-grow-1 overflow-auto px-3 py-2">
+      <h6 class="text-center mb-2">Active Users</h6>
+
+      <!-- When Game Not Started -->
+      <div *ngIf="!isStarted" class="flex-grow-1 overflow-auto px-1">
         <div
           *ngFor="let item of activeUsers"
           class="card mb-2 shadow-sm border-0"
@@ -23,94 +23,75 @@
           }"
         >
           <div
-            class="card-body d-flex align-items-center justify-content-between py-2 px-3"
+            class="card-body d-flex align-items-center justify-content-between py-2 px-2"
           >
             <div class="d-flex align-items-center gap-2">
               <img
                 src="https://skribbl.io/img/setting_1.gif"
                 class="rounded-circle"
-                style="width: 30px; height: 30px"
-                alt="avatar"
+                style="width: 30px"
               />
               <div>
-                <strong
-                  [ngClass]="{
-                    'text-primary': item === user,
-                    'text-dark': item !== user
-                  }"
-                >
-                  {{ item }}
-                </strong>
+                <strong [ngClass]="{ 'text-primary': item === user }">{{
+                  item
+                }}</strong>
                 <div *ngIf="CreatedBy != item" class="small text-muted">
-                  Waiting for start...
+                  Waiting...
                 </div>
                 <div *ngIf="CreatedBy == item" class="small text-muted">
                   <b>Owner</b>
                 </div>
               </div>
             </div>
-
-            <div class="d-flex align-items-center gap-1">
+            <div class="d-flex gap-1">
               <img
                 *ngIf="CreatedBy === item"
                 src="https://skribbl.io/img/owner.gif"
-                title="Room Owner"
-                style="width: 24px; height: 24px"
+                style="width: 20px"
               />
               <img
                 *ngIf="whoDraw === item"
                 src="https://skribbl.io/img/pen.gif"
-                title="Drawing"
-                style="width: 24px; height: 24px"
+                style="width: 20px"
               />
             </div>
           </div>
         </div>
       </div>
 
-      <div *ngIf="isStarted" class="flex-grow-1 overflow-auto px-3 py-2">
+      <!-- When Game Started -->
+      <div *ngIf="isStarted" class="flex-grow-1 overflow-auto px-1">
         <div
           *ngFor="let item of groupPoints"
           class="card mb-2 shadow-sm border-0"
-          [ngClass]="{
-            'bg-success' : guessedUsers.has(item.user) ,
-          }"
+          [ngClass]="{ 'bg-success': guessedUsers.has(item.user) }"
         >
           <div
-            class="card-body d-flex align-items-center justify-content-between py-2 px-3"
+            class="card-body d-flex align-items-center justify-content-between py-2 px-2"
           >
             <div class="d-flex align-items-center gap-2">
               <img
                 src="https://skribbl.io/img/setting_1.gif"
                 class="rounded-circle"
-                style="width: 30px; height: 30px"
-                alt="avatar"
+                style="width: 30px"
               />
               <div>
-                <strong
-                  [ngClass]="{
-                    'text-primary': item.user === user,
-                    'text-dark': item.user !== user
-                  }"
-                >
-                  {{ item.user }}
-                </strong>
+                <strong [ngClass]="{ 'text-primary': item.user === user }">{{
+                  item.user
+                }}</strong>
                 <div class="small text-muted">{{ item.points }} pts</div>
               </div>
             </div>
-
-            <div class="d-flex align-items-center gap-1">
+            <div class="d-flex gap-1">
               <img
                 *ngIf="CreatedBy === item.user"
                 src="https://skribbl.io/img/owner.gif"
-                title="Room Owner"
-                style="width: 24px; height: 24px"
+                style="width: 20px"
               />
               <img
                 *ngIf="whoDraw === item.user"
                 src="https://skribbl.io/img/pen.gif"
-                title="Drawing"
-                style="width: 24px; height: 24px"
+                style="width: 20px"
               />
             </div>
           </div>
@@ -119,79 +100,70 @@
     </div>
 
     <!-- Center Panel: Canvas -->
-    <div class="col-md-7 canvas-wrapper col-sm-12 d-flex flex-column p-3">
-      <div class="fs-3 text-center">Round {{ round }} of {{ totalRound }}</div>
+    <div class="col-12 col-md-7 order-1 order-md-2 d-flex flex-column p-3">
+      <div class="text-center fs-4 mb-2">
+        Round {{ round }} of {{ totalRound }}
+      </div>
 
-      <div class="text-center" *ngIf="!isStarted && user == CreatedBy">
-        Start a game with {{ activeUsers.length }} users :
-        <button class="btn btn-outline-secondary w-10" (click)="start()">
+      <!-- Start Game Controls -->
+      <div class="text-center mb-2" *ngIf="!isStarted && user == CreatedBy">
+        Start with {{ activeUsers.length }} users:
+        <button class="btn btn-outline-secondary me-2" (click)="start()">
           Play
         </button>
-        <button class="btn" data-bs-toggle="modal" data-bs-target="#infoModal">
-          <img
-            src="https://skribbl.io/img/settings.gif"
-            title="Setting"
-            style="width: 25px; height: 25px"
-          />
+        <button
+          class="btn btn-outline-secondary"
+          data-bs-toggle="modal"
+          data-bs-target="#infoModal"
+        >
+          <img src="https://skribbl.io/img/settings.gif" style="width: 25px" />
         </button>
       </div>
-      <div class="flex-grow-1 border rounded shadow-sm mb-3">
-        <div *ngIf="isStarted" class="text-center fs-3">
+
+      <!-- Drawing Canvas -->
+      <div class="flex-grow-1 mb-2 border rounded shadow-sm">
+        <div *ngIf="isStarted" class="text-center fs-4 py-2">
           {{ userSelectedWord }}
         </div>
-        <div *ngIf="whoDraw != user && isStarted" class="text-center fs-3">
+        <div *ngIf="whoDraw != user && isStarted" class="text-center fs-4 py-2">
           <span *ngFor="let _ of [].constructor(guessWordLength)">_ </span>
-          {{ guessWordLength }}
         </div>
         <ng-whiteboard
           (mouseup)="send()"
           (touchend)="send()"
-          style="height: 96%; width: 100%"
           class="whiteboard-box"
+          style="height: 100%; width: 100%"
           [center]="true"
           (dataChange)="onDataChange($event)"
-          [drawingEnabled]="whoDraw == user ? true : false"
+          [drawingEnabled]="whoDraw == user"
           [options]="whiteboardOptions"
-        >
-        </ng-whiteboard>
+        ></ng-whiteboard>
       </div>
 
-      <!-- Controls Below Canvas -->
-      <div class="d-flex justify-content-between">
+      <!-- Drawing Tools -->
+      <div class="d-flex flex-wrap gap-2">
         <button
-          class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0"
+          class="btn btn-outline-secondary w-100 w-sm-auto"
           [disabled]="whoDraw != user"
           (click)="Undo()"
         >
-          Undo
-          <img
-            src="https://skribbl.io/img/undo.gif"
-            style="width: 35px; height: 35px"
-          />
+          Undo <img src="https://skribbl.io/img/undo.gif" style="width: 20px" />
         </button>
         <button
-          class="btn btn-outline-secondary w-100 w-sm-auto me-0 me-sm-2 mb-2 mb-sm-0"
+          class="btn btn-outline-secondary w-100 w-sm-auto"
           [disabled]="whoDraw != user"
           (click)="clearBoard()"
         >
           Clear
-          <img
-            src="https://skribbl.io/img/clear.gif"
-            style="width: 35px; height: 35px"
-          />
+          <img src="https://skribbl.io/img/clear.gif" style="width: 20px" />
         </button>
-        <!-- <button
-          class="btn btn-primary w-100 w-sm-auto"
-          [disabled]="whoDraw != user"
-          (click)="send()"
-        >
-          Send Canvas
-        </button> -->
       </div>
     </div>
+
     <!-- Right Panel: Chat -->
     <div
-      class="col-md-3 col-sm-12 d-flex flex-column bg-white border-start p-3 chat-container"
+      class="col-12 chatsection col-md-3 order-2 order-md-3 d-flex flex-column bg-white border-start p-3"
+      style="height: 700px; overflow: hidden"
     >
       <!-- Chat Header -->
       <div
@@ -200,12 +172,8 @@
         <strong>{{ naam }}</strong>
       </div>
 
-      <!-- Chat Messages: Scrollable -->
-      <div
-        #chatContainer
-        class="flex-grow-1 overflow-auto mb-3"
-        style="min-height: 0"
-      >
+      <!-- Chat Messages -->
+      <div #chatContainer class="flex-grow-1 overflow-auto mb-2">
         <div
           *ngFor="let msg of chats"
           class="d-flex mb-2"
@@ -233,18 +201,18 @@
         </div>
       </div>
 
-      <!-- Chat Input (Fixed at Bottom) -->
-      <div class="d-flex chat-input">
+      <!-- Chat Input -->
+      <div class="d-flex gap-2">
         <input
           type="text"
-          class="form-control mb-2 mb-sm-0"
+          class="form-control"
           [disabled]="whoDraw == user || isUserGuess"
           placeholder="Type a message..."
           [(ngModel)]="message"
           (keydown.enter)="sendchat()"
         />
         <button
-          class="btn btn-success ms-sm-2 w-100 w-sm-auto"
+          class="btn btn-success"
           [disabled]="whoDraw == user || isUserGuess"
           (click)="sendchat()"
         >
@@ -353,13 +321,13 @@
   aria-labelledby="infoModalLabel"
   aria-hidden="true"
 >
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header bg-primary text-white">
         <h5 class="modal-title" id="infoModalLabel">Change Setting</h5>
         <button
           type="button"
-          class="btn-close"
+          class="btn-close btn-close-white"
           data-bs-dismiss="modal"
           aria-label="Close"
         ></button>
@@ -367,17 +335,53 @@
       <div class="modal-body">
         <input style="display: none" type="text" [(ngModel)]="groupId" />
         <input style="display: none" type="text" [(ngModel)]="CreatedBy" />
-        Rounds : <input type="text" [(ngModel)]="postrounds" /> <br />
-        Timer : <input type="text" [(ngModel)]="posttimer" /> <br />
-        WordCount : <input type="text" [(ngModel)]="postwordCount" /> <br />
-        <div
-          class="btn btn-primary"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-          (click)="postChangeSetting()"
-        >
-          Update Room
-        </div>
+
+        <form class="row g-3">
+          <div class="col-md-4">
+            <label for="roundsInput" class="form-label">Rounds</label>
+            <input
+              type="number"
+              class="form-control"
+              id="roundsInput"
+              [(ngModel)]="postrounds"
+              name="rounds"
+            />
+          </div>
+
+          <div class="col-md-4">
+            <label for="timerInput" class="form-label">Timer</label>
+            <input
+              type="number"
+              class="form-control"
+              id="timerInput"
+              [(ngModel)]="posttimer"
+              name="timer"
+            />
+          </div>
+
+          <div class="col-md-4">
+            <label for="wordCountInput" class="form-label">Word Count</label>
+            <input
+              type="number"
+              class="form-control"
+              id="wordCountInput"
+              [(ngModel)]="postwordCount"
+              name="wordCount"
+            />
+          </div>
+
+          <div class="col-12 text-end">
+            <button
+              type="button"
+              class="btn btn-success"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+              (click)="postChangeSetting()"
+            >
+              Update Room
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

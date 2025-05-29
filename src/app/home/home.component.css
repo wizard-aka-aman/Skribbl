@@ -1,71 +1,32 @@
-/* Ensure chat fills viewport height */
-.chat-container {
-    max-width: 700px;
-    margin: 0 auto;
-    height: 100vh;
-    border: 1px solid #dee2e6;
-    border-radius: 0.5rem;
-    background-color: #ffffff;
-  }
-  
-  /* Chat message bubbles */
-  .message-bubble {
-    border-radius: 20px;
-    max-width: 70%;
-    word-break: break-word;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  }
-  
-  /* Chat input stays at bottom */
-  .chat-input {
-    border-top: 1px solid #dee2e6;
-    padding-top: 0.75rem;
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 576px) {
-    .chat-container {
-      max-width: 100%;
-      height: auto;
-      border: none;
-      border-radius: 0;
-    }
-    .message-bubble {
-      max-width: 90%;
-    }
-    .chat-input{
-      position: absolute;
-      top: 10vh;
-      right: 20%;
-      background-color: #218838;
-    }
-  }
-  .canvas-wrapper {
-  height: 700px; /* Default height */
-}
-
-@media (max-width: 768px) {
-  .canvas-wrapper {
-    height: 500px; /* Increase height on tablets and smaller */
-  }
-}
-
-@media (max-width: 576px) {
-  .canvas-wrapper {
-    height: 600px; /* Even more height on phones */
-  }
+html, body {
+  height: 100%;
+  overflow: hidden;
 }
 
 .whiteboard-box {
-  width: 50rem;
-  height: 100% ;
-  display: block;
-  box-sizing: border-box;
+  min-height: 300px;
+  background-color: #fff;
+  border: 2px solid #dee2e6;
 }
-.bg-gradient-success {
-  background: linear-gradient(45deg, #28a745, #218838);
+
+.message-bubble {
+  transition: all 0.2s ease-in-out;
 }
 
 .bg-bronze {
   background-color: #cd7f32;
+}
+
+.chat-input input {
+  border-radius: 0.25rem;
+}
+.whiteboard-box {
+  min-height: 250px;
+}
+
+@media (max-width: 768px) {
+  .chatsection {
+    height: 300px !important; 
+    max-height: 300px !important;
+  }
 }
