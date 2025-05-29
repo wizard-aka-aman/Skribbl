@@ -1,7 +1,7 @@
 <div class="lobby-container">
   <div class="lobby-card">
     <h1>Skribbl Game</h1>
-
+    <a target="#" href="https://hepefek442.bsite.net/">First unsafe the URL </a>
     <div class="button-group">
       <button class="action-btn"   data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="createRoom()">Create Room</button>
       <button class="action-btn" data-bs-toggle="modal" data-bs-target="#exampleModal"  >Join Room</button>
@@ -12,73 +12,91 @@
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabelcreate" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header bg-primary text-white">
         <h1 class="modal-title fs-5" id="exampleModalLabel">Join Room</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        Group ID : <input type="text" [(ngModel)]="userinput"> <br>
-        Name : <input type="text" [(ngModel)]="user">  <br> 
+        <form class="row g-3">
+          <div class="col-12">
+            <label for="groupIdInput" class="form-label">Group ID</label>
+            <input type="text" id="groupIdInput"  class="form-control" [(ngModel)]="userinput" name="groupId">
+          </div>
+          <div class="col-12">
+            <label for="nameInput" class="form-label">Name</label>
+            <input type="text" id="nameInput" class="form-control" [(ngModel)]="user" name="name">
+          </div>
+        </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"  (click)="GetJoinGroup()" >Join Room</button>
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal" (click)="GetJoinGroup()">Join Room</button>
       </div>
     </div>
   </div>
-</div> 
+</div>
+
 
 <!-- Create view Modal -->
 <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered modal-md">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header bg-primary text-white">
         <h1 class="modal-title fs-5" id="staticBackdropLabel">Create Room</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">
-           <span> Group ID:  <br> {{ groupId }}</span>
-          </h1> <button class=" btn btn-outline-secondary btn-sm" (click)="copygroupId()">
-        Copy
-      </button>
-      <div class="form-group">
-        <label for="exampleFormControlInput1">Name : </label>
-        <input type="text" class="form-control" [(ngModel)]="user"   placeholder="Enter Your Name">
-       </div>
-        <div class="form-group">
-              <label for="exampleFormControlSelect1">Timer</label>
-              <select class="form-control" [(ngModel)] ="timer" id="exampleFormControlSelect1">
-                <option value="20">20</option>
-                <option value="40">40</option>
-                <option value="60">60</option>
-                <option value="80">80</option>
-                <option value="100">100</option> 
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="exampleFormControlSelect1">Rounds</label>
-              <select class="form-control" [(ngModel)] ="rounds"> 
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option> 
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="exampleFormControlSelect1">WordCount</label>
-              <select class="form-control" [(ngModel)] ="wordCount">
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option> 
-              </select>
-            </div>
 
+      <div class="modal-body">
+        <div class="mb-3 d-flex justify-content-between align-items-start flex-wrap">
+          <div>
+            <strong>Group ID:</strong>
+            <div class="text-muted">{{ groupId }}</div>
+          </div>
+          <button class="btn btn-outline-secondary btn-sm mt-2 mt-md-0" (click)="copygroupId()">Copy</button>
+        </div>
+
+        <div class="mb-3">
+          <label for="nameInput" class="form-label">Name</label>
+          <input type="text" id="nameInput" class="form-control" [(ngModel)]="user" placeholder="Enter Your Name">
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="timerSelect" class="form-label">Timer</label>
+            <select class="form-select" id="timerSelect" [(ngModel)]="timer">
+              <option value="20">20</option>
+              <option value="40">40</option>
+              <option value="60">60</option>
+              <option value="80">80</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label for="roundsSelect" class="form-label">Rounds</label>
+            <select class="form-select" id="roundsSelect" [(ngModel)]="rounds">
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label for="wordCountSelect" class="form-label">Word Count</label>
+            <select class="form-select" id="wordCountSelect" [(ngModel)]="wordCount">
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
       </div>
+
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="PostApiCreateRoom()"  >CreateRoom</button>
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal" (click)="PostApiCreateRoom()">Create Room</button>
       </div>
     </div>
   </div>

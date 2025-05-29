@@ -15,9 +15,9 @@ export class LayoutComponent {
   groupId: string | null = null;
   userinput :string = ''
   user :string = ''
-  timer : number = 0;
-  rounds : number = 0;
-  wordCount : number = 0;
+  timer : number = 20;
+  rounds : number = 2;
+  wordCount : number = 3;
   createRoomBody :any  ={};
   createRoom() {
     this.groupId = crypto.randomUUID(); // Generates a random GUID
@@ -33,6 +33,10 @@ export class LayoutComponent {
   }
 
   PostApiCreateRoom(){
+    if(this.user ==""){
+      this.toastr.error("Please enter your name" ,"Error")
+      return;
+    }
     //[routerLink]="['/home']"[queryParams]="{groupId : groupId , user : user}
     this.createRoomBody.timer = this.timer;
     this.createRoomBody.rounds = this.rounds;
@@ -48,13 +52,17 @@ export class LayoutComponent {
   },
   error: (err: any) => {
     console.error('Error creating group:', err);
-     this.toastr.error("Something went wrong. Please try again.",  'https://hepefek442.bsite.net/');
+     this.toastr.error("Something went wrong. Please try again.",  'Error');
     // You can also add additional error handling logic here, like displaying a message to the user
   }
 });
 
   }
   GetJoinGroup(){
+    if(this.user == ""){
+      this.toastr.error("Name can't be Empty")
+      return;
+    }
     this.serviceSrv.getGroup(this.userinput).subscribe({
   next: (res: any) => {
     console.log(res);
