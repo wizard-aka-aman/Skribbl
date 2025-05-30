@@ -137,13 +137,13 @@ export class HomeComponent {
           break;
       }
     });
-    
+
 
   }
 
   async StartGame() {
-     
-   await this.serviceSrv.startConnection(
+
+    await this.serviceSrv.startConnection(
       this.groupId,
       this.user,
       (groupId, data) => {
@@ -172,10 +172,10 @@ export class HomeComponent {
         console.log("Active users updated:", users);
 
       },
-      
+
 
     );
-    
+
 
     try {
       this.activeUsers = await this.serviceSrv.GetUsersInGroup(this.groupId);
@@ -183,7 +183,7 @@ export class HomeComponent {
     } catch (err) {
       console.error('Failed to fetch users:', err);
     }
-    
+
 
     this.serviceSrv.getMessages(this.groupId).subscribe((msgs: any) => {
       this.chats = msgs;
@@ -280,13 +280,33 @@ export class HomeComponent {
 
       this.guessedUsers.add(guesser)
       // Optional: increase drawer's points
-      const guesserObj = this.activeUsersChanges.find((u: any) => u.user === guesser); 
-      const drawerObj = this.activeUsersChanges.find((u: any) => u.user === drawer); 
+      const guesserObj = this.activeUsersChanges.find((u: any) => u.user === guesser);
+      const drawerObj = this.activeUsersChanges.find((u: any) => u.user === drawer);
       if (drawerObj) {
-          drawerObj.points += 5;
+
+        if (this.guessedUsers.size == 1) {
+          drawerObj.points += 100;
+        }
+        drawerObj.points += 50;
+
       }
       if (guesserObj) {
-        guesserObj.points += 10;
+
+
+        if (this.guessedUsers.size == 1) {
+          guesserObj.points += 75;
+        }
+        else if (this.guessedUsers.size == 2) {
+          guesserObj.points += 50;
+        }
+        else if (this.guessedUsers.size == 3) {
+          guesserObj.points += 25;
+        }
+        else {
+          guesserObj.points += 5;
+        }
+
+
 
         this.groupPoints = [...this.activeUsersChanges,];
         this.serviceSrv.broadcastPoints(this.groupId, this.groupPoints);
@@ -316,7 +336,7 @@ export class HomeComponent {
       }
 
     });
-   
+
 
     this.serviceSrv.hubConnection.on("ReceiveWordReveal", (word: string) => {
       this.chats.push({
@@ -324,10 +344,10 @@ export class HomeComponent {
         message: `⏰ Time's up! The word was: ${word}`,
       });
       setTimeout(() => {
-      const el = this.chatContainer.nativeElement;
-      el.scrollTop = el.scrollHeight;
-    }, 250);
-    }); 
+        const el = this.chatContainer.nativeElement;
+        el.scrollTop = el.scrollHeight;
+      }, 250);
+    });
   }
 
 
@@ -445,8 +465,8 @@ export class HomeComponent {
       if (this.timer == 0) {
         clearInterval(this.counting);
         this.timer = this.posttimer;
-        console.log("in settimeout "+this.userSelectedWord);
-        
+        console.log("in settimeout " + this.userSelectedWord);
+
         this.serviceSrv.broadcastSelectedWordToAll(this.groupId, this.userSelectedWord);
         this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
         console.log(this.groupPoints);
@@ -539,6 +559,12 @@ export class HomeComponent {
         console.error(err);
       }
     });
+  }
+  copygroupId() {
+    if (this.groupId) {
+      navigator.clipboard.writeText(this.groupId);
+      this.toastr.success("Room ID copied to clipboard!", "Success")
+    }
   }
 }
 

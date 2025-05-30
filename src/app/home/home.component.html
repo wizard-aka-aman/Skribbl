@@ -123,14 +123,15 @@
       <span class="fw-semibold">Play Now</span>
     </button>
     <!-- Settings Button -->
-    <button
-      class="btn btn-outline-light btn-lg d-flex align-items-center justify-content-center px-4 py-2 border-2 shadow-sm"
+    <button style="background-color: rgb(205, 205, 253);  "
+      class="btn btn-outline-light btn-lg d-flex align-items-center justify-content-center px-2 py-2 border-2 shadow-sm"
       data-bs-toggle="modal"
       data-bs-target="#infoModal"
       title="Game Settings"
     >
       <img src="https://skribbl.io/img/settings.gif" alt="Settings" style="width: 28px; height: 28px;" />
     </button>
+    <button class="btn btn-outline-secondary btn-sm mx-2 mt-md-0 " (click)="copygroupId()">Copy</button>
   </div>
 </div>
 
@@ -185,7 +186,7 @@
       <div
         class="text-center bg-primary text-white rounded py-2 mb-3 shadow-sm"
       >
-        <strong>{{ naam }}</strong>
+        <strong>{{ naam }} </strong>
       </div>
 
       <!-- Chat Messages -->
