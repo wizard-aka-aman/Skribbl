@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import * as signalR from '@microsoft/signalr';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root'
@@ -9,15 +11,15 @@ export class ServiceService {
 
   hubConnection!: signalR.HubConnection;
 
-  // baseUrl = 'https://localhost:7263'; // local server as needed
-  baseUrl = 'https://hepefek442.bsite.net'; // Global  server as needed
+  baseUrl = 'https://localhost:7263'; // local server as needed
+  // baseUrl = 'https://hepefek442.bsite.net'; // Global  server as needed
   pen: any
   users: any;
   joinAudio :any= new Audio("https://skribbl.io/audio/join.ogg");
    leaveAudio :any= new Audio("https://skribbl.io/audio/leave.ogg");
 
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,private toastr: ToastrService, private route: Router) { }
   public async startConnection(groupId: string, user: string,
     onCanvasReceive: (groupId: string, data: any) => void,
     onChatReceive: (user: string, message: string, sentAt: string) => void,
@@ -27,7 +29,12 @@ export class ServiceService {
       .withUrl(`${this.baseUrl}/chatHub?username=${user}`, { withCredentials: true })
       .withAutomaticReconnect()
       .build();
-
+      this.hubConnection.on("UsernameExists", (message: string) => {
+      this.toastr.error(`User ${message} is already taken in this group`, 'Error');
+      this.route.navigate(['/']);
+      console.log(message);
+      
+    });
     this.hubConnection.on("ReceiveMessage", onCanvasReceive);
     this.hubConnection.on("ReceiveChat", onChatReceive);
     this.hubConnection.on("UserJoined", (userName: string, groupId: string) => {

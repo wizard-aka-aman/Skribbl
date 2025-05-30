@@ -137,10 +137,12 @@ export class HomeComponent {
           break;
       }
     });
+    
 
   }
 
   async StartGame() {
+     
    await this.serviceSrv.startConnection(
       this.groupId,
       this.user,
@@ -170,8 +172,10 @@ export class HomeComponent {
         console.log("Active users updated:", users);
 
       },
+      
 
     );
+    
 
     try {
       this.activeUsers = await this.serviceSrv.GetUsersInGroup(this.groupId);
@@ -179,6 +183,7 @@ export class HomeComponent {
     } catch (err) {
       console.error('Failed to fetch users:', err);
     }
+    
 
     this.serviceSrv.getMessages(this.groupId).subscribe((msgs: any) => {
       this.chats = msgs;
@@ -275,9 +280,13 @@ export class HomeComponent {
 
       this.guessedUsers.add(guesser)
       // Optional: increase drawer's points
-      const drawerObj = this.activeUsersChanges.find((u: any) => u.user === guesser);
+      const guesserObj = this.activeUsersChanges.find((u: any) => u.user === guesser); 
+      const drawerObj = this.activeUsersChanges.find((u: any) => u.user === drawer); 
       if (drawerObj) {
-        drawerObj.points += 1;
+          drawerObj.points += 5;
+      }
+      if (guesserObj) {
+        guesserObj.points += 10;
 
         this.groupPoints = [...this.activeUsersChanges,];
         this.serviceSrv.broadcastPoints(this.groupId, this.groupPoints);
@@ -307,10 +316,7 @@ export class HomeComponent {
       }
 
     });
-    this.serviceSrv.hubConnection.on("UsernameExists", (message: string) => {
-      this.toastr.error(message);
-      this.route.navigate(['/']);
-    });
+   
 
     this.serviceSrv.hubConnection.on("ReceiveWordReveal", (word: string) => {
       this.chats.push({

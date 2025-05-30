@@ -36,9 +36,11 @@ export class LayoutComponent {
     }
   }
 
-  PostApiCreateRoom() {
+  PostApiCreateRoom() { 
     this.user = this.user.trim();
     this.userinput = this.userinput.trim();
+     console.log(this.user);
+    console.log(this.userinput);
     if (this.user == "") {
       this.toastr.error("Please enter your name", "Error")
       return;
@@ -78,9 +80,11 @@ export class LayoutComponent {
 
 
   }
-  GetJoinGroup() {
+  GetJoinGroup() {     
     this.user = this.user.trim();
     this.userinput = this.userinput.trim();
+    console.log(this.user);
+    console.log(this.userinput);
     
     if (this.user == "") {
       this.toastr.error("Name can't be Empty")
