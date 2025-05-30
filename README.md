@@ -52,6 +52,50 @@ For end-to-end (e2e) testing, run:
 ng e2e
 ```
 
+✅ Core Features You’ve Implemented
+SignalR Integration for:
+
+Broadcasting canvas updates
+
+Real-time chat
+
+Active users and drawer updates
+
+Timer and round management
+
+Scoreboard synchronization
+
+Whiteboard Functionality:
+
+Undo, Clear, Send drawing actions
+
+Game Logic:
+
+Random word generation
+
+Word guessing with points
+
+Rounds and timers
+
+Audio cues for different game events
+
+UI Management:
+
+Modals for word selection and game winner
+
+Automatic scrolling for chat
+
+✅ Good Practices Noted
+Audio feedback enhances engagement.
+
+Sorting users and handling token verification on init.
+
+Managing chat scroll and DOM manipulation cleanly using ViewChild.
+
+Point system with time bonus, placement bonus, and drawer bonuses.
+
+Extensive use of service abstraction (serviceSrv) for SignalR + backend communication.
+
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
 ## Additional Resources
