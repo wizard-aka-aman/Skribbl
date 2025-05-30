@@ -229,7 +229,9 @@ export class HomeComponent {
       this.groupPoints.sort((a: any, b: any) => b.points - a.points)
     });
     this.serviceSrv.hubConnection.on("ReceiveRoundEnded", (round: string) => {
-      this.round++;
+      if(this.totalRound>this.round){
+        this.round++;
+      }
       this.toastr.info(`${round} has ended!`, "Round Update");
       this.roundEndSuccessAudio.play();
     });
@@ -237,6 +239,7 @@ export class HomeComponent {
     this.serviceSrv.hubConnection.on("ReceiveGameStarted", () => {
       this.isStarted = true; // Hide the Start button
       this.toastr.info("Game has been started!", "Started");
+      this.round =1;
       this.roundStartAudio.play();
     });
 
@@ -403,10 +406,10 @@ export class HomeComponent {
     }, 250);
   }
   start() {
-
-    console.log(this.activeUsers);
-    console.log((Math.random() * 100).toFixed(0));
-    console.log(this.randomWords[Number.parseInt((Math.random() * 100).toFixed(0))]);
+    console.log(this.group);
+    console.log(this.postrounds);
+    
+    
     this.selectedRandomWords = [];
     this.clearBoard();
     this.round = 1;
@@ -423,13 +426,13 @@ export class HomeComponent {
       this.activeUsersChanges = this.activeUsers.map((e: any) => ({
         user: e,
         isDrawing: false,
-        counter: this.group.rounds,
+        counter: this.postrounds,
         points: 0
       }))
     } else {
       for (let key in this.activeUsersChanges) {
         this.activeUsersChanges[key].isDrawing = false;
-        this.activeUsersChanges[key].counter = this.group.rounds
+        this.activeUsersChanges[key].counter = this.postrounds
       }
     }
 
@@ -448,7 +451,7 @@ export class HomeComponent {
 
     if (!currentUser) {
       if (changeisDrawingToFalse) {
-        const roundMessage = `Round ${this.group.rounds - changeisDrawingToFalse.counter}`;
+        const roundMessage = `Round ${this.postrounds - changeisDrawingToFalse.counter}`;
         this.serviceSrv.broadcastRoundEnded(this.groupId, roundMessage);
         this.activeUsersChanges.forEach((user: any) => user.isDrawing = false);
         this.nextDrawer();
@@ -458,6 +461,7 @@ export class HomeComponent {
       // this.toastr.info("All users have drawn once!", "Info");
       this.isStarted = false
       this.showWinnerModal();
+      this.clearBoard();
       console.log(this.groupPoints);
 
       return;
@@ -497,6 +501,7 @@ export class HomeComponent {
   selectedRandomWord(word: string) {
     this.userSelectedWord = word;
     this.showWordSelectionModal = false; // 👈 Hide modal
+    this.clearBoard();
     console.log("Selected word:", this.userSelectedWord);
 
     // Optional: Broadcast the word selection
