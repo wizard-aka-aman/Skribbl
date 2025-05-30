@@ -1,65 +1,73 @@
-<div class="lobby-container">
-  <div class="lobby-card">
-    <h1>Skribbl Game</h1>
-    <a target="#" href="https://hepefek442.bsite.net/">First unsafe the URL </a>
-    <div class="button-group">
-      <button class="action-btn"   data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="createRoom()">Create Room</button>
-      <button class="action-btn" data-bs-toggle="modal" data-bs-target="#exampleModal"  >Join Room</button>
-    </div>
- 
-  </div>
-</div> 
+<!-- Lobby Container -->
+ <div class=" " style="background:url('https://skribbl.io/img/background.png');  ">
 
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabelcreate" aria-hidden="true">
+
+<div class="container d-flex justify-content-center align-items-center " style="height: 100vh; ">
+   
+    <div class="card  shadow-lg text-center mx-auto" style="max-width: 500px;">
+    <div class="card-body">
+      <h1 class="mb-3 fw-bold text-primary">🎨 Skribbl Game</h1>
+      <a href="https://hepefek442.bsite.net/" class="d-block mb-4 text-danger fw-semibold text-decoration-none" target="_blank">
+        First unsafe the URL
+      </a>
+      <div class="d-grid gap-3">
+        <button class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="createRoom()">Create Room</button>
+        <button class="btn btn-outline-success btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">Join Room</button>
+      </div>
+    </div>
+  </div>
+   
+</div>
+
+<!-- Join Room Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">Join Room</h1>
+    <div class="modal-content shadow-lg">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="exampleModalLabel">Join Room</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form class="row g-3">
           <div class="col-12">
             <label for="groupIdInput" class="form-label">Group ID</label>
-            <input type="text" id="groupIdInput"  class="form-control" [(ngModel)]="userinput" name="groupId">
+            <input type="text" id="groupIdInput" class="form-control" [(ngModel)]="userinput" name="groupId" placeholder="Enter Group ID">
           </div>
           <div class="col-12">
             <label for="nameInput" class="form-label">Name</label>
-            <input type="text" id="nameInput" class="form-control" [(ngModel)]="user" name="name">
+            <input type="text" id="nameInput" class="form-control" [(ngModel)]="user" name="name" placeholder="Enter Your Name">
           </div>
         </form>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      <div class="modal-footer d-flex justify-content-between">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
         <button type="button" class="btn btn-success" data-bs-dismiss="modal" (click)="GetJoinGroup()">Join Room</button>
       </div>
     </div>
   </div>
 </div>
 
-
-<!-- Create view Modal -->
+<!-- Create Room Modal -->
 <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-md">
-    <div class="modal-content">
+    <div class="modal-content shadow-lg">
       <div class="modal-header bg-primary text-white">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">Create Room</h1>
+        <h5 class="modal-title" id="staticBackdropLabel">Create Room</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
-        <div class="mb-3 d-flex justify-content-between align-items-start flex-wrap">
+        <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap">
           <div>
             <strong>Group ID:</strong>
-            <div class="text-muted">{{ groupId }}</div>
+            <div class="text-muted small mt-1">{{ groupId }}</div>
           </div>
-          <button class="btn btn-outline-secondary btn-sm mt-2 mt-md-0" (click)="copygroupId()">Copy</button>
+          <button class="btn btn-sm btn-outline-primary mt-2" (click)="copygroupId()">Copy</button>
         </div>
 
         <div class="mb-3">
-          <label for="nameInput" class="form-label">Name</label>
-          <input type="text" id="nameInput" class="form-control" [(ngModel)]="user" placeholder="Enter Your Name">
+          <label for="creatorNameInput" class="form-label">Name</label>
+          <input type="text" id="creatorNameInput" class="form-control" [(ngModel)]="user" placeholder="Enter Your Name">
         </div>
 
         <div class="row g-3">
@@ -73,7 +81,6 @@
               <option value="100">100</option>
             </select>
           </div>
-
           <div class="col-md-4">
             <label for="roundsSelect" class="form-label">Rounds</label>
             <select class="form-select" id="roundsSelect" [(ngModel)]="rounds">
@@ -82,7 +89,6 @@
               <option value="4">4</option>
             </select>
           </div>
-
           <div class="col-md-4">
             <label for="wordCountSelect" class="form-label">Word Count</label>
             <select class="form-select" id="wordCountSelect" [(ngModel)]="wordCount">
@@ -94,10 +100,14 @@
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      <div class="modal-footer d-flex justify-content-between">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
         <button type="button" class="btn btn-success" data-bs-dismiss="modal" (click)="PostApiCreateRoom()">Create Room</button>
       </div>
     </div>
   </div>
 </div>
+ </div>
+
+
+ <img src="https://skribbl.io/img/load.gif" *ngIf="iscomplete" class="spinner" style="width: 75px; height: 75px; position: absolute; top: 50%; left: 50%;">

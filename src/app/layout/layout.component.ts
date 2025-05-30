@@ -22,6 +22,7 @@ export class LayoutComponent {
   wordCount: number = 3;
   createRoomBody: any = {};
   token = uuidv4(); // e.g., 'a1b2c3...'
+  iscomplete :boolean = false;
   createRoom() {
     this.groupId = crypto.randomUUID(); // Generates a random GUID
   }
@@ -45,6 +46,8 @@ export class LayoutComponent {
       this.toastr.error("Please enter your name", "Error")
       return;
     }
+    this.iscomplete = true;
+
     this.serviceSrv.MapToken({
       token: this.token,
       username: this.user
@@ -62,10 +65,12 @@ export class LayoutComponent {
         this.serviceSrv.postCreateGroup(this.createRoomBody).subscribe({
           next: (res: any) => {
             console.log(res);
+            this.iscomplete = false;
             this.route.navigate(['/home'], { queryParams: { groupId: this.groupId, token: this.token } });
                         
           },
           error: (err: any) => {
+            this.iscomplete = false;
             console.error('Error creating group:', err);
             this.toastr.error("Something went wrong. Please try again.", 'Error');
             // You can also add additional error handling logic here, like displaying a message to the user
@@ -73,6 +78,7 @@ export class LayoutComponent {
         });
       },
       error: (err: any) => {
+        this.iscomplete = false;
         console.log(err);
       }
 
@@ -90,6 +96,7 @@ export class LayoutComponent {
       this.toastr.error("Name can't be Empty")
       return;
     }
+    this.iscomplete = true
     this.serviceSrv.MapToken({
       token: this.token,
       username: this.user
@@ -101,19 +108,23 @@ export class LayoutComponent {
         console.log(Object.keys(res).length);
 
         if (Object.keys(res).length === 0) {
+          this.iscomplete = false;
           this.toastr.error("Group not found", "Error");
         } else {
           // this.toastr.success("Group Joined", "Success");
+          this.iscomplete = false
           this.route.navigate(['/home'], { queryParams: { groupId: this.userinput, token: this.token } });
         }
       },
       error: (err: any) => {
+        this.iscomplete = false;
         console.error('Error retrieving group:', err);
         this.toastr.error("Something went wrong. Please try again.", 'https://hepefek442.bsite.net/');
       }
     });
       },
       error: (err: any) =>{
+        this.iscomplete = false;
         console.log(err);
         
       }

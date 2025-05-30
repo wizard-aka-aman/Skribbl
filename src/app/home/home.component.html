@@ -62,7 +62,7 @@
       <!-- When Game Started -->
       <div *ngIf="isStarted" class="flex-grow-1 overflow-auto px-1">
         <div
-          *ngFor="let item of groupPoints"
+          *ngFor="let item of groupPoints; let i = index"
           class="card mb-2 shadow-sm border-0"
           [ngClass]="{ 'bg-success': guessedUsers.has(item.user) }"
         >
@@ -70,6 +70,7 @@
             class="card-body d-flex align-items-center justify-content-between py-2 px-2"
           >
             <div class="d-flex align-items-center gap-2">
+              <b>#{{i+1}}</b>
               <img
                 src="https://skribbl.io/img/setting_1.gif"
                 class="rounded-circle"

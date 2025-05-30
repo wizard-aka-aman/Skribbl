@@ -151,13 +151,14 @@ export class HomeComponent {
         const currentUserent = this.whiteboard.data || [];
         this.whiteboard.data = [...currentUserent, ...data];
       },
-      (user: string, message: string, sentAt: string) => {
+      (user: string, message: string, sentAt: string,timer:number) => {
 
         this.chats.push({
           sender: user,
           message: message,
           sentAt: sentAt,
-          type: 'chat'
+          type: 'chat',
+          timer:timer
         });
         // this.chats.push({ sender: user, message, sentAt });
         console.log(this.chats);
@@ -169,6 +170,7 @@ export class HomeComponent {
       },
       (users: string[]) => {
         this.activeUsers = users;
+         this.activeUsers =this.activeUsers.sort()
         console.log("Active users updated:", users);
 
       },
@@ -179,6 +181,7 @@ export class HomeComponent {
 
     try {
       this.activeUsers = await this.serviceSrv.GetUsersInGroup(this.groupId);
+      this.activeUsers =this.activeUsers.sort()
       console.log(this.activeUsers);
     } catch (err) {
       console.error('Failed to fetch users:', err);
@@ -223,6 +226,7 @@ export class HomeComponent {
 
     this.serviceSrv.hubConnection.on("ReceivePoints", (points: any) => {
       this.groupPoints = points;
+      this.groupPoints.sort((a: any, b: any) => b.points - a.points)
     });
     this.serviceSrv.hubConnection.on("ReceiveRoundEnded", (round: string) => {
       this.round++;
@@ -262,7 +266,7 @@ export class HomeComponent {
 
 
 
-    this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: string, word: string) => {
+    this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: string, word: string,timer:number) => {
       this.playerGuessedAudio.play();
 
       this.chats.push({
@@ -291,6 +295,12 @@ export class HomeComponent {
 
       }
       if (guesserObj) {
+        var maxTimer = this.posttimer; 
+        var timeBonus =((timer/maxTimer)*100);
+        console.log("timeBonus"+ timeBonus);
+        
+        guesserObj.points += timeBonus;
+        guesserObj.points += 50; // base point
 
 
         if (this.guessedUsers.size == 1) {
@@ -305,9 +315,10 @@ export class HomeComponent {
         else {
           guesserObj.points += 5;
         }
-
-
-
+        console.log(guesserObj.points);
+        
+         guesserObj.points =  Math.round(guesserObj.points)
+        
         this.groupPoints = [...this.activeUsersChanges,];
         this.serviceSrv.broadcastPoints(this.groupId, this.groupPoints);
       }
@@ -380,8 +391,10 @@ export class HomeComponent {
     console.log(this.userSelectedWord);
 
     if (this.message.trim()) {
-      this.serviceSrv.sendMessage(this.groupId, this.user, this.message, sentAt);
-      console.log({ groupid: this.groupId, user: this.user, message: this.message, sent: sentAt });
+      // console.log(this.timer);
+      
+      this.serviceSrv.sendMessage(this.groupId, this.user, this.message, sentAt,this.groupTimer);
+      console.log({ groupid: this.groupId, user: this.user, message: this.message, sent: sentAt ,timer:this.groupTimer});
       this.message = '';
     }
     setTimeout(() => {

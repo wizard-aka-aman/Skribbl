@@ -22,7 +22,7 @@ export class ServiceService {
   constructor(private http: HttpClient,private toastr: ToastrService, private route: Router) { }
   public async startConnection(groupId: string, user: string,
     onCanvasReceive: (groupId: string, data: any) => void,
-    onChatReceive: (user: string, message: string, sentAt: string) => void,
+    onChatReceive: (user: string, message: string, sentAt: string,timer:number) => void,
     onUserListUpdate: (users: string[]) => void): Promise<void> {
 
     this.hubConnection = new signalR.HubConnectionBuilder()
@@ -64,9 +64,9 @@ export class ServiceService {
     }
   }
 
-  public sendMessage(groupId: string, user: string, message: string, sentAt: string) {
+  public sendMessage(groupId: string, user: string, message: string, sentAt: string,timer:number) {
     if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
-      this.hubConnection.invoke("SendMessage", groupId, user, message, sentAt);
+      this.hubConnection.invoke("SendMessage", groupId, user, message, sentAt ,timer);
     }
     // this.saveMessage({ groupName: groupId, sender: user, message })
   }

@@ -53,3 +53,30 @@
     width: 48%;
   }
 }
+.card {
+  border-radius: 1rem;
+  transition: transform 0.2s;
+}
+.card:hover {
+  transform: scale(1.02);
+}
+
+.modal-content {
+  border-radius: 1rem;
+}
+
+.spinner{
+ animation-name: example;
+  animation-duration: .5s;
+  animation-iteration-count: infinite; 
+  animation-direction: normal; 
+  animation-timing-function: linear; 
+}
+@keyframes example {
+  0% {
+    transform: rotate(0deg);
+  } 
+  100%{
+    transform: rotate(360deg);
+  }
+}
