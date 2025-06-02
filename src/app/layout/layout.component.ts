@@ -27,7 +27,7 @@ export class LayoutComponent {
     this.groupId = crypto.randomUUID(); // Generates a random GUID
   }
   constructor(private toastr: ToastrService, private serviceSrv: ServiceService, private route: Router) {
-    console.log(this.token);
+    // console.log(this.token);
 
   }
   copygroupId() {
@@ -40,8 +40,8 @@ export class LayoutComponent {
   PostApiCreateRoom() { 
     this.user = this.user.trim();
     this.userinput = this.userinput.trim();
-     console.log(this.user);
-    console.log(this.userinput);
+    //  console.log(this.user);
+    // console.log(this.userinput);
     if (this.user == "") {
       this.toastr.error("Please enter your name", "Error")
       return;
@@ -53,18 +53,18 @@ export class LayoutComponent {
       username: this.user
     }).subscribe({
       next: (res: any) => {
-        console.log(res);
+        // console.log(res);
         
         this.createRoomBody.timer = this.timer;
         this.createRoomBody.rounds = this.rounds;
         this.createRoomBody.WordCount = this.wordCount;
         this.createRoomBody.RoomName = this.groupId;
         this.createRoomBody.CreatedBy = this.user;
-        console.log(this.createRoomBody);
+        // console.log(this.createRoomBody);
 
         this.serviceSrv.postCreateGroup(this.createRoomBody).subscribe({
           next: (res: any) => {
-            console.log(res);
+            // console.log(res);
             this.iscomplete = false;
             this.route.navigate(['/home'], { queryParams: { groupId: this.groupId, token: this.token } });
                         
@@ -79,7 +79,7 @@ export class LayoutComponent {
       },
       error: (err: any) => {
         this.iscomplete = false;
-        console.log(err);
+        // console.log(err);
       }
 
     }) 
@@ -89,8 +89,8 @@ export class LayoutComponent {
   GetJoinGroup() {     
     this.user = this.user.trim();
     this.userinput = this.userinput.trim();
-    console.log(this.user);
-    console.log(this.userinput);
+    // console.log(this.user);
+    // console.log(this.userinput);
     
     if (this.user == "") {
       this.toastr.error("Name can't be Empty")
@@ -104,8 +104,8 @@ export class LayoutComponent {
       next:(res:any)=>{
         this.serviceSrv.getGroup(this.userinput).subscribe({
       next: (res: any) => {
-        console.log(res);
-        console.log(Object.keys(res).length);
+        // console.log(res);
+        // console.log(Object.keys(res).length);
 
         if (Object.keys(res).length === 0) {
           this.iscomplete = false;
@@ -125,7 +125,7 @@ export class LayoutComponent {
       },
       error: (err: any) =>{
         this.iscomplete = false;
-        console.log(err);
+        // console.log(err);
         
       }
     })

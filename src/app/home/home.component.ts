@@ -89,37 +89,37 @@ export class HomeComponent {
     this.router.queryParams.subscribe(param => {
       this.groupId = (param['groupId']);
       this.token = (param['token']);
-      console.log(this.groupId);
-      console.log(this.token);
+      // console.log(this.groupId);
+      // console.log(this.token);
       this.naam = this.groupId
     })
     this.serviceSrv.GetUserFromToken(this.token).subscribe({
       next: async (res: any) => {
-        console.log(res);
-        console.log(res.user);
+        // console.log(res);
+        // console.log(res.user);
         this.user = res.user;
         this.StartGame();
       },
       error: (err: any) => {
-        console.log(err);
+        // console.log(err);
         this.toastr.error("token changed or invalid", "error");
         this.route.navigate(['/']);
       }
     })
-    console.log(this.user);
-    console.log(this.groupId);
+    // console.log(this.user);
+    // console.log(this.groupId);
 
     this.serviceSrv.getGroup(this.groupId).subscribe((res: any) => {
       this.group = res[0];
-      console.log(res);
-      console.log(this.group.timer);
+      // console.log(res);
+      // console.log(this.group.timer);
       this.CreatedBy = this.group.createdBy
-      console.log(this.CreatedBy);
+      // console.log(this.CreatedBy);
 
       this.groupTimer = this.group.timer;
       this.totalRound = this.group.rounds;
       this.wordCount = this.group.wordCount
-      console.log(this.totalRound);
+      // console.log(this.totalRound);
       this.posttimer = this.groupTimer;
       this.postrounds = this.totalRound;
       this.postwordCount = this.wordCount;
@@ -149,7 +149,12 @@ export class HomeComponent {
       (groupId, data) => {
 
         const currentUserent = this.whiteboard.data || [];
-        this.whiteboard.data = [...currentUserent, ...data];
+        //console.log(this.data); 
+        // console.log(data);
+        
+        
+        this.whiteboard.data =[...data] ;
+        // this.whiteboard.data =[...currentUserent , data[this.data.length-1]] ;
       },
       (user: string, message: string, sentAt: string,timer:number) => {
 
@@ -161,7 +166,7 @@ export class HomeComponent {
           timer:timer
         });
         // this.chats.push({ sender: user, message, sentAt });
-        console.log(this.chats);
+        // console.log(this.chats);
 
         setTimeout(() => {
           const el = this.chatContainer.nativeElement;
@@ -171,7 +176,7 @@ export class HomeComponent {
       (users: string[]) => {
         this.activeUsers = users;
          this.activeUsers =this.activeUsers.sort()
-        console.log("Active users updated:", users);
+        // console.log("Active users updated:", users);
 
       },
 
@@ -182,7 +187,7 @@ export class HomeComponent {
     try {
       this.activeUsers = await this.serviceSrv.GetUsersInGroup(this.groupId);
       this.activeUsers =this.activeUsers.sort()
-      console.log(this.activeUsers);
+      // console.log(this.activeUsers);
     } catch (err) {
       console.error('Failed to fetch users:', err);
     }
@@ -201,13 +206,13 @@ export class HomeComponent {
 
       this.selectedRandomWords = []
       this.clearBoard();
-      console.log(this.userSelectedWord);
+      // console.log(this.userSelectedWord);
 
       this.userSelectedWord = ""
       this.isUserGuess = false
       this.guessedUsers.clear();
       this.selectedRandomWords = this.getUniqueRandomWords(this.wordCount);
-      console.log(this.selectedRandomWords);
+      // console.log(this.selectedRandomWords);
 
       if (this.user == drawer) {
         this.showWordSelectionModal = true;
@@ -300,7 +305,7 @@ export class HomeComponent {
       if (guesserObj) {
         var maxTimer = this.posttimer; 
         var timeBonus =((timer/maxTimer)*100);
-        console.log("timeBonus"+ timeBonus);
+        // console.log("timeBonus"+ timeBonus);
         
         guesserObj.points += timeBonus;
         guesserObj.points += 50; // base point
@@ -318,7 +323,7 @@ export class HomeComponent {
         else {
           guesserObj.points += 5;
         }
-        console.log(guesserObj.points);
+        // console.log(guesserObj.points);
         
          guesserObj.points =  Math.round(guesserObj.points)
         
@@ -327,11 +332,11 @@ export class HomeComponent {
       }
       // Check if all users except the drawer have guessed
       const usersToGuess = this.activeUsers.filter(u => u !== drawer);
-      console.log(usersToGuess);
+      // console.log(usersToGuess);
 
       const allGuessed = usersToGuess.every(user => this.guessedUsers.has(user));
-      console.log(allGuessed);
-      console.log(this.guessedUsers);
+      // console.log(allGuessed);
+      // console.log(this.guessedUsers);
 
 
       if (allGuessed) {
@@ -369,6 +374,7 @@ export class HomeComponent {
   onDataChange(data: WhiteboardElement[]) {
     this.data = data;
     // console.log(this.data);
+
   }
 
   clearBoard() {
@@ -391,13 +397,13 @@ export class HomeComponent {
 
   sendchat() {
     const sentAt = new Date().toLocaleString();
-    console.log(this.userSelectedWord);
+    // console.log(this.userSelectedWord);
 
     if (this.message.trim()) {
       // console.log(this.timer);
       
       this.serviceSrv.sendMessage(this.groupId, this.user, this.message, sentAt,this.groupTimer);
-      console.log({ groupid: this.groupId, user: this.user, message: this.message, sent: sentAt ,timer:this.groupTimer});
+      // console.log({ groupid: this.groupId, user: this.user, message: this.message, sent: sentAt ,timer:this.groupTimer});
       this.message = '';
     }
     setTimeout(() => {
@@ -406,8 +412,8 @@ export class HomeComponent {
     }, 250);
   }
   start() {
-    console.log(this.group);
-    console.log(this.postrounds);
+    // console.log(this.group);
+    // console.log(this.postrounds);
     
     
     this.selectedRandomWords = [];
@@ -436,7 +442,7 @@ export class HomeComponent {
       }
     }
 
-    console.log(this.activeUsersChanges);
+    // console.log(this.activeUsersChanges);
     this.groupPoints = this.activeUsersChanges;
     this.isStarted = true;
     this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
@@ -447,7 +453,7 @@ export class HomeComponent {
   nextDrawer() {
     const currentUser = this.activeUsersChanges.find((u: any) => !u.isDrawing);
     const changeisDrawingToFalse = this.activeUsersChanges.find((u: any) => u.counter != 0);
-    console.log(currentUser);
+    // console.log(currentUser);
 
     if (!currentUser) {
       if (changeisDrawingToFalse) {
@@ -462,7 +468,7 @@ export class HomeComponent {
       this.isStarted = false
       this.showWinnerModal();
       this.clearBoard();
-      console.log(this.groupPoints);
+      // console.log(this.groupPoints);
 
       return;
     }
@@ -477,16 +483,16 @@ export class HomeComponent {
     this.counting = setInterval(() => {
       this.timer--;
       this.serviceSrv.broadcastTimer(this.groupId, this.timer); // 🔁 real-time update
-      console.log(this.timer);
+      // console.log(this.timer);
 
       if (this.timer == 0) {
         clearInterval(this.counting);
         this.timer = this.posttimer;
-        console.log("in settimeout " + this.userSelectedWord);
+        // console.log("in settimeout " + this.userSelectedWord);
 
         this.serviceSrv.broadcastSelectedWordToAll(this.groupId, this.userSelectedWord);
         this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
-        console.log(this.groupPoints);
+        // console.log(this.groupPoints);
         //  this.selectedRandomWords = []  
         this.nextDrawer();
         return;
@@ -502,7 +508,7 @@ export class HomeComponent {
     this.userSelectedWord = word;
     this.showWordSelectionModal = false; // 👈 Hide modal
     this.clearBoard();
-    console.log("Selected word:", this.userSelectedWord);
+    // console.log("Selected word:", this.userSelectedWord);
 
     // Optional: Broadcast the word selection
     this.serviceSrv.broadcastSelectedWord(this.groupId, this.userSelectedWord);
@@ -515,8 +521,8 @@ export class HomeComponent {
     this.winner = this.groupPoints.sort((a: any, b: any) => b.points - a.points);
     this.winner = this.winner.slice(0, 3);
     this.winnerModalVisible = true;
-    console.log(this.winner);
-    console.log(this.groupPoints);
+    // console.log(this.winner);
+    // console.log(this.groupPoints);
 
 
     this.serviceSrv.broadcastGameEnded(this.groupId, this.winner);
@@ -532,7 +538,7 @@ export class HomeComponent {
     // Shuffle the words array using Fisher-Yates shuffle
     const shuffled = [...this.randomWords];
     for (let i = shuffled.length - 1; i > 0; i--) {
-      console.log("hehe");
+      // console.log("hehe");
 
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -556,7 +562,7 @@ export class HomeComponent {
     this.postRoomBody.WordCount = this.postwordCount;
     this.postRoomBody.RoomName = this.groupId;
     this.postRoomBody.CreatedBy = this.user;
-    console.log(this.postRoomBody);
+    // console.log(this.postRoomBody);
     this.serviceSrv.postChangeSetting(this.postRoomBody, this.groupId).subscribe({
       next: (res: any) => {
         // Broadcast the new settings to everyone
