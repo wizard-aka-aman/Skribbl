@@ -293,7 +293,8 @@
         </h5>
       </div>
       <div class="modal-body px-5 py-4">
-        <h4 class="mb-4 text-warning fw-bold">🏆 Top 3 Players</h4>
+        <h4 *ngIf="activeUsers.length==2" class="mb-4 text-warning fw-bold">🏆 Top 2 Players</h4>
+        <h4 *ngIf="activeUsers.length>2" class="mb-4 text-warning fw-bold">🏆 Top 3 Players</h4>
         <div class="row justify-content-center">
           <div
             class="col-md-4 mb-3"

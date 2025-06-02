@@ -84,7 +84,7 @@ export class HomeComponent {
   hintwordLength: number = 0
   randomNumberForHint: any;
   correctedWord: string[] = []
-
+  previousActiveUsers :any;
 
   @ViewChild('chatContainer') chatContainer!: ElementRef<HTMLDivElement>;
   @ViewChild(NgWhiteboardComponent) whiteboard!: NgWhiteboardComponent;
@@ -476,14 +476,17 @@ export class HomeComponent {
     }
     this.serviceSrv.broadcastGameStarted(this.groupId); // 👈 Call this
 
+    const hasUserListChanged = JSON.stringify(this.activeUsers) !== JSON.stringify(this.previousActiveUsers);
 
-    if (Object.keys(this.activeUsersChanges).length === 0) {
+
+    if (Object.keys(this.activeUsersChanges).length === 0||hasUserListChanged || !this.activeUsersChanges ) {
       this.activeUsersChanges = this.activeUsers.map((e: any) => ({
         user: e,
         isDrawing: false,
         counter: this.postrounds,
         points: 0
       }))
+        this.previousActiveUsers = [...this.activeUsers]; // Update snapshot
     } else {
       for (let key in this.activeUsersChanges) {
         this.activeUsersChanges[key].isDrawing = false;
