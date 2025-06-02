@@ -11,7 +11,7 @@ export class ServiceService {
 
   hubConnection!: signalR.HubConnection;
 
-  // baseUrl = 'https://localhost:7263'; // local server as needed
+  //baseUrl = 'https://localhost:7263'; // local server as needed
  baseUrl = 'https://hepefek442.bsite.net'; // Global  server as needed
   pen: any
   users: any;
@@ -150,6 +150,10 @@ public broadcastRoomChanges(groupId: string, timer: number, rounds: number, word
 public broadcastSelectedWordToAll(groupId: string, word: string) {
   this.hubConnection.invoke("BroadcastWordReveal", groupId, word);
 }
+public BroadcastHint(groupId: string, hint: string[]) {
+  this.hubConnection.invoke("BroadcastHint", groupId, hint).catch(err => console.error(err));
+}
+
 
 storeSelectedWord(groupId: string, word: string) {
   this.hubConnection.invoke("StoreSelectedWord", groupId, word);

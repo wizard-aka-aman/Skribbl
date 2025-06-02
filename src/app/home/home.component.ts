@@ -79,11 +79,16 @@ export class HomeComponent {
   postrounds: number = 0;
   postwordCount: number = 0;
   token: string = "";
-
+  hint: string[] = [];
+  hintTimer: number = 0;
+  hintwordLength: number = 0
+  randomNumberForHint: any;
+  correctedWord: string[] = []
 
 
   @ViewChild('chatContainer') chatContainer!: ElementRef<HTMLDivElement>;
   @ViewChild(NgWhiteboardComponent) whiteboard!: NgWhiteboardComponent;
+  $index: any;
   constructor(private router: ActivatedRoute, private toastr: ToastrService, private whiteboardService: NgWhiteboardService, private serviceSrv: ServiceService, private route: Router) {
 
     this.router.queryParams.subscribe(param => {
@@ -151,19 +156,19 @@ export class HomeComponent {
         const currentUserent = this.whiteboard.data || [];
         //console.log(this.data); 
         // console.log(data);
-        
-        
-        this.whiteboard.data =[...data] ;
+
+
+        this.whiteboard.data = [...data];
         // this.whiteboard.data =[...currentUserent , data[this.data.length-1]] ;
       },
-      (user: string, message: string, sentAt: string,timer:number) => {
+      (user: string, message: string, sentAt: string, timer: number) => {
 
         this.chats.push({
           sender: user,
           message: message,
           sentAt: sentAt,
           type: 'chat',
-          timer:timer
+          timer: timer
         });
         // this.chats.push({ sender: user, message, sentAt });
         // console.log(this.chats);
@@ -175,7 +180,7 @@ export class HomeComponent {
       },
       (users: string[]) => {
         this.activeUsers = users;
-         this.activeUsers =this.activeUsers.sort()
+        this.activeUsers = this.activeUsers.sort()
         // console.log("Active users updated:", users);
 
       },
@@ -186,7 +191,7 @@ export class HomeComponent {
 
     try {
       this.activeUsers = await this.serviceSrv.GetUsersInGroup(this.groupId);
-      this.activeUsers =this.activeUsers.sort()
+      this.activeUsers = this.activeUsers.sort()
       // console.log(this.activeUsers);
     } catch (err) {
       console.error('Failed to fetch users:', err);
@@ -207,8 +212,10 @@ export class HomeComponent {
       this.selectedRandomWords = []
       this.clearBoard();
       // console.log(this.userSelectedWord);
-
+      this.serviceSrv.broadcastSelectedWord(this.groupId, "");
       this.userSelectedWord = ""
+      this.hintwordLength = 0
+      this.hint = []
       this.isUserGuess = false
       this.guessedUsers.clear();
       this.selectedRandomWords = this.getUniqueRandomWords(this.wordCount);
@@ -228,13 +235,53 @@ export class HomeComponent {
         this.tickAudio.play();
       }
     });
+  this.serviceSrv.hubConnection.on("ReceiveHint", (serverHint: string[]) => {
+  // console.log("Received hint from server:", serverHint);
+
+  if (!serverHint || serverHint.length === 0) return;
+
+  // Don't mutate the server-sent hint directly
+  const hintCopy = [...serverHint];
+
+  // Assign to component state
+  this.hint = hintCopy;
+
+  // Guard against missing values
+  if (
+    !this.correctedWord ||
+    this.correctedWord.length === 0 ||
+    !this.userSelectedWord ||
+    this.userSelectedWord.length === 0 ||
+    !this.randomNumberForHint ||
+    this.hintwordLength >= this.randomNumberForHint.length
+  ) {
+    // console.warn("State not properly initialized for hint update");
+    return;
+  }
+
+  // Avoid divide-by-zero
+  let perTimehint = Math.max(1, Math.round(this.posttimer / this.userSelectedWord.length ))*2;
+  let starting = this.randomNumberForHint[this.hintwordLength];
+
+  if (this.groupTimer % perTimehint === 0) {
+    hintCopy[starting] = this.correctedWord[starting];
+    this.hintwordLength++;
+
+    // Save the updated hint
+    this.hint = hintCopy;
+
+    // console.log("Updated hint: ", this.hint);
+  }
+});
+
+    
 
     this.serviceSrv.hubConnection.on("ReceivePoints", (points: any) => {
       this.groupPoints = points;
       this.groupPoints.sort((a: any, b: any) => b.points - a.points)
     });
     this.serviceSrv.hubConnection.on("ReceiveRoundEnded", (round: string) => {
-      if(this.totalRound>this.round){
+      if (this.totalRound > this.round) {
         this.round++;
       }
       this.toastr.info(`${round} has ended!`, "Round Update");
@@ -244,7 +291,7 @@ export class HomeComponent {
     this.serviceSrv.hubConnection.on("ReceiveGameStarted", () => {
       this.isStarted = true; // Hide the Start button
       this.toastr.info("Game has been started!", "Started");
-      this.round =1;
+      this.round = 1;
       this.roundStartAudio.play();
     });
 
@@ -269,12 +316,14 @@ export class HomeComponent {
     this.serviceSrv.hubConnection.on("ReceiveSelectedWord", (word: string) => {
       this.guessWordLength = word.length;
       this.userSelectedWord = word;
+      this.hint = this.generateUnderscoreHint(word.length);
+      this.correctedWord = Array.from(word);
       // this.toastr.info("Word!", word);
     });
 
 
 
-    this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: string, word: string,timer:number) => {
+    this.serviceSrv.hubConnection.on("UserGuessedWord", (guesser: string, drawer: string, word: string, timer: number) => {
       this.playerGuessedAudio.play();
 
       this.chats.push({
@@ -303,10 +352,10 @@ export class HomeComponent {
 
       }
       if (guesserObj) {
-        var maxTimer = this.posttimer; 
-        var timeBonus =((timer/maxTimer)*100);
+        var maxTimer = this.posttimer;
+        var timeBonus = ((timer / maxTimer) * 100);
         // console.log("timeBonus"+ timeBonus);
-        
+
         guesserObj.points += timeBonus;
         guesserObj.points += 50; // base point
 
@@ -324,9 +373,9 @@ export class HomeComponent {
           guesserObj.points += 5;
         }
         // console.log(guesserObj.points);
-        
-         guesserObj.points =  Math.round(guesserObj.points)
-        
+
+        guesserObj.points = Math.round(guesserObj.points)
+
         this.groupPoints = [...this.activeUsersChanges,];
         this.serviceSrv.broadcastPoints(this.groupId, this.groupPoints);
       }
@@ -401,8 +450,8 @@ export class HomeComponent {
 
     if (this.message.trim()) {
       // console.log(this.timer);
-      
-      this.serviceSrv.sendMessage(this.groupId, this.user, this.message, sentAt,this.groupTimer);
+
+      this.serviceSrv.sendMessage(this.groupId, this.user, this.message, sentAt, this.groupTimer);
       // console.log({ groupid: this.groupId, user: this.user, message: this.message, sent: sentAt ,timer:this.groupTimer});
       this.message = '';
     }
@@ -414,8 +463,8 @@ export class HomeComponent {
   start() {
     // console.log(this.group);
     // console.log(this.postrounds);
-    
-    
+
+
     this.selectedRandomWords = [];
     this.clearBoard();
     this.round = 1;
@@ -482,14 +531,18 @@ export class HomeComponent {
     this.timer = this.posttimer
     this.counting = setInterval(() => {
       this.timer--;
-      this.serviceSrv.broadcastTimer(this.groupId, this.timer); // 🔁 real-time update
-      // console.log(this.timer);
-
-      if (this.timer == 0) {
-        clearInterval(this.counting);
-        this.timer = this.posttimer;
-        // console.log("in settimeout " + this.userSelectedWord);
-
+      if(this.hint != undefined)
+      this.serviceSrv.BroadcastHint(this.groupId, this.hint);
+    this.serviceSrv.broadcastTimer(this.groupId, this.timer); // 🔁 real-time update
+    
+    // console.log(this.timer);
+    
+    if (this.timer == 0) {
+      clearInterval(this.counting);
+      this.timer = this.posttimer;
+      // console.log("in settimeout " + this.userSelectedWord);
+      
+      this.serviceSrv.BroadcastHint(this.groupId, []);
         this.serviceSrv.broadcastSelectedWordToAll(this.groupId, this.userSelectedWord);
         this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
         // console.log(this.groupPoints);
@@ -514,7 +567,8 @@ export class HomeComponent {
     this.serviceSrv.broadcastSelectedWord(this.groupId, this.userSelectedWord);
     this.serviceSrv.storeSelectedWord(this.groupId, word); // ✅ store word
     this.serviceSrv.setCurrentDrawer(this.groupId, this.user); // ✅ store drawer
-
+    this.randomNumberForHint = this.generateUniqueRandomNumbers(0, this.userSelectedWord.length-1)
+    
   }
 
   showWinnerModal() {  // 👀 Show winner modal
@@ -590,5 +644,19 @@ export class HomeComponent {
       this.toastr.success("Room ID copied to clipboard!", "Success")
     }
   }
+  generateUniqueRandomNumbers(min: number, max: number): number[] {
+    const uniqueNumbers = new Set<number>();
+
+    while (uniqueNumbers.size < (max - min + 1)) {
+      const rand = Math.floor(Math.random() * (max - min + 1)) + min;
+      uniqueNumbers.add(rand);
+    }
+
+    return Array.from(uniqueNumbers);
+  }
+  generateUnderscoreHint(length: number): string[] {
+    return Array(length).fill('_');
+  }
+
 }
 

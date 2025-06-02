@@ -144,7 +144,9 @@
           {{ userSelectedWord }}
         </div>
         <div *ngIf="whoDraw != user && isStarted" class="text-center fs-4 py-2">
-          <span *ngFor="let _ of [].constructor(guessWordLength)">_ </span>
+          <span *ngFor="let item of this.hint; let i of $index">{{item}} </span>
+          <span *ngIf="userSelectedWord.length ==0">Wating user to select...</span>
+          <span *ngIf="userSelectedWord.length !=0">{{userSelectedWord.length}}</span>
         </div>
         <ng-whiteboard
           (mouseup)="send()"
