@@ -70,7 +70,7 @@
             class="card-body d-flex align-items-center justify-content-between py-2 px-2"
           >
             <div class="d-flex align-items-center gap-2">
-              <b>#{{i+1}}</b>
+              <b>#{{ i + 1 }}</b>
               <img
                 src="https://skribbl.io/img/setting_1.gif"
                 class="rounded-circle"
@@ -103,40 +103,54 @@
     <!-- Center Panel: Canvas -->
     <div class="col-12 col-md-7 order-1 order-md-2 d-flex flex-column p-3">
       <!-- Round Display -->
-<!-- Round Display -->
-<div class="text-center  ">
-  <h2 class="fw-bold text-gradient text-primary">Round {{ round }} of {{ totalRound }}</h2>
-</div>
+      <!-- Round Display -->
+      <div class="text-center">
+        <h2 class="fw-bold text-gradient text-primary">
+          Round {{ round }} of {{ totalRound }}
+        </h2>
+      </div>
 
-<!-- Game Controls -->
-<div
-  class="d-flex flex-column flex-md-row justify-content-center align-items-center   text-center"
-  *ngIf="!isStarted && user == CreatedBy"
->
-  <div class="fs-4 text-muted   mb-md-0">
-    <span class="text-info fw-bold">Start with </span> 
-    <span class="text-success fw-bold">{{ activeUsers.length }} </span> 
-    <span class="text-info fw-bold">users:</span>
-  </div>
-  <div class="d-flex align-items-center mb-2 ">
-    <!-- Play Button -->
-    <button style="background-color: rgb(174, 176, 255); height: 35px;" class="btn  btn-gradient text-gradient  mx-2 shadow-lg border-0" (click)="start()">
-      <span class="fw-semibold">Play Now</span>
-    </button>
-    <!-- Settings Button -->
-    <button style="background-color: rgb(205, 205, 253);  "
-      class="btn btn-outline-light btn-lg d-flex align-items-center justify-content-center px-2 py-2 border-2 shadow-sm"
-      data-bs-toggle="modal"
-      data-bs-target="#infoModal"
-      title="Game Settings"
-    >
-      <img src="https://skribbl.io/img/settings.gif" alt="Settings" style="width: 28px; height: 28px;" />
-    </button>
-    <button class="btn btn-outline-secondary btn-sm mx-2 mt-md-0 " (click)="copygroupId()">Copy</button>
-  </div>
-</div>
-
-
+      <!-- Game Controls -->
+      <div
+        class="d-flex flex-column flex-md-row justify-content-center align-items-center text-center"
+        *ngIf="!isStarted && user == CreatedBy"
+      >
+        <div class="fs-4 text-muted mb-md-0">
+          <span class="text-info fw-bold">Start with </span>
+          <span class="text-success fw-bold">{{ activeUsers.length }} </span>
+          <span class="text-info fw-bold">users:</span>
+        </div>
+        <div class="d-flex align-items-center mb-2">
+          <!-- Play Button -->
+          <button
+            style="background-color: rgb(174, 176, 255); height: 35px"
+            class="btn btn-gradient text-gradient mx-2 shadow-lg border-0"
+            (click)="start()"
+          >
+            <span class="fw-semibold">Play Now</span>
+          </button>
+          <!-- Settings Button -->
+          <button
+            style="background-color: rgb(205, 205, 253)"
+            class="btn btn-outline-light btn-lg d-flex align-items-center justify-content-center px-2 py-2 border-2 shadow-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#infoModal"
+            title="Game Settings"
+          >
+            <img
+              src="https://skribbl.io/img/settings.gif"
+              alt="Settings"
+              style="width: 28px; height: 28px"
+            />
+          </button>
+          <button
+            class="btn btn-outline-secondary btn-sm mx-2 mt-md-0"
+            (click)="copygroupId()"
+          >
+            Copy
+          </button>
+        </div>
+      </div>
 
       <!-- Drawing Canvas -->
       <div class="flex-grow-1 mb-2 border rounded shadow-sm">
@@ -144,19 +158,33 @@
           {{ userSelectedWord }}
         </div>
         <div *ngIf="whoDraw != user && isStarted" class="text-center fs-4 py-2">
-          <span *ngFor="let item of this.hint; let i of $index">{{item}} </span>
-          <span *ngIf="userSelectedWord.length ==0">Wating user to select...</span>
-          <span *ngIf="userSelectedWord.length !=0">{{userSelectedWord.length}}</span>
+          <span *ngFor="let item of this.hint; let i; of: $index"
+            >{{ item }}
+          </span>
+          <span *ngIf="userSelectedWord.length == 0"
+            >Wating user to select...</span
+          >
+          <span *ngIf="userSelectedWord.length != 0">{{
+            userSelectedWord.length
+          }}</span>
         </div>
         <ng-whiteboard
-          (mouseup)="send()"
+          (mouseup)="send()" 
           (touchend)="send()"
+          
+          [strokeColor]="Strokecolor"
+          [(selectedTool)]="selectedTool"
+          (elementsSelected)="selectElements($event)"
+          (elementsUpdated)="selectElements($event)"
+          [strokeWidth]="strokeWidth"
           class="whiteboard-box"
           style="height: 100%; width: 100%"
           [center]="true"
           (dataChange)="onDataChange($event)"
           [drawingEnabled]="whoDraw == user"
           [options]="whiteboardOptions"
+          [data]="data"
+          
         ></ng-whiteboard>
       </div>
 
@@ -167,7 +195,8 @@
           [disabled]="whoDraw != user"
           (click)="Undo()"
         >
-          Undo (u) <img src="https://skribbl.io/img/undo.gif" style="width: 20px" />
+          Undo (u)
+          <img src="https://skribbl.io/img/undo.gif" style="width: 20px" />
         </button>
         <button
           class="btn btn-outline-secondary w-100 w-sm-auto"
@@ -177,6 +206,30 @@
           Clear (c)
           <img src="https://skribbl.io/img/clear.gif" style="width: 20px" />
         </button>
+
+        <div
+          class="w-100 justify-content-around align-items-center d-flex gap-2"
+        >
+          <div class="">
+            Select Color : 
+            <input
+            type="color"
+            class="btn btn-outline-secondary  w-sm-auto"
+            [disabled]="whoDraw != user"
+            [(ngModel)]="Strokecolor"
+            
+            />
+          </div>
+            <div class="">
+            Select Width : 
+            <select [(ngModel)]="strokeWidth">
+              <option [ngValue]="1">▪️</option>
+              <option [ngValue]="2">◼️</option>
+              <option [ngValue]="4">⬛</option>
+            </select>
+          </div>
+          
+        </div>
       </div>
     </div>
 
@@ -293,8 +346,12 @@
         </h5>
       </div>
       <div class="modal-body px-5 py-4">
-        <h4 *ngIf="activeUsers.length==2" class="mb-4 text-warning fw-bold">🏆 Top 2 Players</h4>
-        <h4 *ngIf="activeUsers.length>2" class="mb-4 text-warning fw-bold">🏆 Top 3 Players</h4>
+        <h4 *ngIf="activeUsers.length == 2" class="mb-4 text-warning fw-bold">
+          🏆 Top 2 Players
+        </h4>
+        <h4 *ngIf="activeUsers.length > 2" class="mb-4 text-warning fw-bold">
+          🏆 Top 3 Players
+        </h4>
         <div class="row justify-content-center">
           <div
             class="col-md-4 mb-3"

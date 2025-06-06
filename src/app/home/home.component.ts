@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { NgWhiteboardComponent, WhiteboardElement, WhiteboardOptions } from 'ng-whiteboard';
 import { NgWhiteboardService } from 'ng-whiteboard';
 import { CommonModule } from '@angular/common';
@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { ServiceService } from '../service.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import {ToolType} from 'ng-whiteboard'
 @Component({
   selector: 'app-home',
   imports: [NgWhiteboardComponent, CommonModule, FormsModule],
@@ -15,12 +16,14 @@ import { ToastrService } from 'ngx-toastr';
 export class HomeComponent {
 
   whiteboardOptions: WhiteboardOptions = {
-    backgroundColor: 'rgb(224, 224, 224)',
+    backgroundColor: 'rgb(224, 224, 224)', 
     strokeColor: '#000',
     strokeWidth: 2,
     canvasHeight: 400,
-    canvasWidth: 600
+    canvasWidth: 600, 
+
   };
+  
   data: any;
   groupId: string = '';
   group: any;
@@ -84,15 +87,19 @@ export class HomeComponent {
   hintwordLength: number = 0
   randomNumberForHint: any;
   correctedWord: string[] = []
-  previousActiveUsers :any;
-
+  previousActiveUsers: any;
+  Strokecolor : string = ""
+  strokeWidth : number = 2
+  selectedElements: WhiteboardElement[] = [];
   @ViewChild('chatContainer') chatContainer!: ElementRef<HTMLDivElement>;
   @ViewChild(NgWhiteboardComponent) whiteboard!: NgWhiteboardComponent;
   $index: any;
   constructor(private router: ActivatedRoute, private toastr: ToastrService, private whiteboardService: NgWhiteboardService, private serviceSrv: ServiceService, private route: Router) {
+ 
+    
 
     this.router.queryParams.subscribe(param => {
-      this.groupId = (param['groupId']);
+      this.groupId =  (param['groupId']);
       this.token = (param['token']);
       // console.log(this.groupId);
       // console.log(this.token);
@@ -235,46 +242,46 @@ export class HomeComponent {
         this.tickAudio.play();
       }
     });
-  this.serviceSrv.hubConnection.on("ReceiveHint", (serverHint: string[]) => {
-  // console.log("Received hint from server:", serverHint);
+    this.serviceSrv.hubConnection.on("ReceiveHint", (serverHint: string[]) => {
+      // console.log("Received hint from server:", serverHint);
 
-  if (!serverHint || serverHint.length === 0) return;
+      if (!serverHint || serverHint.length === 0) return;
 
-  // Don't mutate the server-sent hint directly
-  const hintCopy = [...serverHint];
+      // Don't mutate the server-sent hint directly
+      const hintCopy = [...serverHint];
 
-  // Assign to component state
-  this.hint = hintCopy;
+      // Assign to component state
+      this.hint = hintCopy;
 
-  // Guard against missing values
-  if (
-    !this.correctedWord ||
-    this.correctedWord.length === 0 ||
-    !this.userSelectedWord ||
-    this.userSelectedWord.length === 0 ||
-    !this.randomNumberForHint ||
-    this.hintwordLength >= this.randomNumberForHint.length
-  ) {
-    // console.warn("State not properly initialized for hint update");
-    return;
-  }
+      // Guard against missing values
+      if (
+        !this.correctedWord ||
+        this.correctedWord.length === 0 ||
+        !this.userSelectedWord ||
+        this.userSelectedWord.length === 0 ||
+        !this.randomNumberForHint ||
+        this.hintwordLength >= this.randomNumberForHint.length
+      ) {
+        // console.warn("State not properly initialized for hint update");
+        return;
+      }
 
-  // Avoid divide-by-zero
-  let perTimehint = Math.max(1, Math.round(this.posttimer / this.userSelectedWord.length ))*2;
-  let starting = this.randomNumberForHint[this.hintwordLength];
+      // Avoid divide-by-zero
+      let perTimehint = Math.max(1, Math.round(this.posttimer / this.userSelectedWord.length)) * 2;
+      let starting = this.randomNumberForHint[this.hintwordLength];
 
-  if (this.groupTimer % perTimehint === 0) {
-    hintCopy[starting] = this.correctedWord[starting];
-    this.hintwordLength++;
+      if (this.groupTimer % perTimehint === 0) {
+        hintCopy[starting] = this.correctedWord[starting];
+        this.hintwordLength++;
 
-    // Save the updated hint
-    this.hint = hintCopy;
+        // Save the updated hint
+        this.hint = hintCopy;
 
-    // console.log("Updated hint: ", this.hint);
-  }
-});
+        // console.log("Updated hint: ", this.hint);
+      }
+    });
 
-    
+
 
     this.serviceSrv.hubConnection.on("ReceivePoints", (points: any) => {
       this.groupPoints = points;
@@ -419,9 +426,10 @@ export class HomeComponent {
   }
 
 
-
+ @Output() dataChange = new EventEmitter<WhiteboardElement[]>();
   onDataChange(data: WhiteboardElement[]) {
-    this.data = data;
+    this.data = data; 
+    
     // console.log(this.data);
 
   }
@@ -432,16 +440,31 @@ export class HomeComponent {
 
       this.send()
     }, 100);
+  }    
+  
+  selectElements(elements: WhiteboardElement[]) {
+    console.log('🚀 ~ ComprehensiveComponent ~ selectElements ~ elements:', elements);
+    this.selectedElements = elements;
+  } 
+  updateSelectedElement(partialElement: Partial<WhiteboardElement>) {
+    this.whiteboardService.updateSelectedElements(partialElement);
   }
+  selectedTool: ToolType = ToolType.Pen;
   Undo() {
-    this.whiteboardService.undo();
+    
+    this.whiteboardService.undo();  
+    
+    
     setTimeout(() => {
       this.send()
     }, 100);
   }
 
+  OtherFeaturesOnCanvas() {
+  }
   send() {
-    this.serviceSrv.SendCanvas(this.groupId, this.data);
+    this.serviceSrv.SendCanvas(this.groupId, this.data); 
+    
   }
 
   sendchat() {
@@ -479,14 +502,14 @@ export class HomeComponent {
     const hasUserListChanged = JSON.stringify(this.activeUsers) !== JSON.stringify(this.previousActiveUsers);
 
 
-    if (Object.keys(this.activeUsersChanges).length === 0||hasUserListChanged || !this.activeUsersChanges ) {
+    if (Object.keys(this.activeUsersChanges).length === 0 || hasUserListChanged || !this.activeUsersChanges) {
       this.activeUsersChanges = this.activeUsers.map((e: any) => ({
         user: e,
         isDrawing: false,
         counter: this.postrounds,
         points: 0
       }))
-        this.previousActiveUsers = [...this.activeUsers]; // Update snapshot
+      this.previousActiveUsers = [...this.activeUsers]; // Update snapshot
     } else {
       for (let key in this.activeUsersChanges) {
         this.activeUsersChanges[key].isDrawing = false;
@@ -534,18 +557,18 @@ export class HomeComponent {
     this.timer = this.posttimer
     this.counting = setInterval(() => {
       this.timer--;
-      if(this.hint != undefined)
-      this.serviceSrv.BroadcastHint(this.groupId, this.hint);
-    this.serviceSrv.broadcastTimer(this.groupId, this.timer); // 🔁 real-time update
-    
-    // console.log(this.timer);
-    
-    if (this.timer == 0) {
-      clearInterval(this.counting);
-      this.timer = this.posttimer;
-      // console.log("in settimeout " + this.userSelectedWord);
-      
-      this.serviceSrv.BroadcastHint(this.groupId, []);
+      if (this.hint != undefined)
+        this.serviceSrv.BroadcastHint(this.groupId, this.hint);
+      this.serviceSrv.broadcastTimer(this.groupId, this.timer); // 🔁 real-time update
+
+      // console.log(this.timer);
+
+      if (this.timer == 0) {
+        clearInterval(this.counting);
+        this.timer = this.posttimer;
+        // console.log("in settimeout " + this.userSelectedWord);
+
+        this.serviceSrv.BroadcastHint(this.groupId, []);
         this.serviceSrv.broadcastSelectedWordToAll(this.groupId, this.userSelectedWord);
         this.serviceSrv.broadcastPoints(this.groupId, this.activeUsersChanges); // 🔁 update everyone
         // console.log(this.groupPoints);
@@ -570,8 +593,8 @@ export class HomeComponent {
     this.serviceSrv.broadcastSelectedWord(this.groupId, this.userSelectedWord);
     this.serviceSrv.storeSelectedWord(this.groupId, word); // ✅ store word
     this.serviceSrv.setCurrentDrawer(this.groupId, this.user); // ✅ store drawer
-    this.randomNumberForHint = this.generateUniqueRandomNumbers(0, this.userSelectedWord.length-1)
-    
+    this.randomNumberForHint = this.generateUniqueRandomNumbers(0, this.userSelectedWord.length - 1)
+
   }
 
   showWinnerModal() {  // 👀 Show winner modal
