@@ -12,7 +12,7 @@ export class ServiceService {
   hubConnection!: signalR.HubConnection;
 
   // baseUrl = 'https://localhost:7263'; // local server as needed
- baseUrl = 'https://hepefek442.bsite.net'; // Global  server as needed
+ baseUrl = 'https://feyoj61167.bsite.net'; // Global  server as needed
   pen: any
   users: any;
   joinAudio :any= new Audio("https://skribbl.io/audio/join.ogg");
